@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.11"
 pandas = "^2.2.3"
 streamlit = "^1.44.0"
+plotly = "^6.0.1"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.3.2"
@@ -20,6 +21,7 @@ ruff = "^0.11.2"
 isort = "^6.0.1"
 freezegun = "^1.5.1"
 black = "^25.1.0"
+autoflake = "^2.3.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -50,6 +52,6 @@ pre_tests = 'task lint'
 tests_dev = 'ENVIRONMENT=development pytest -s -x -vv'
 tests = 'pytest -s -x --cov=app -vv'
 # run
-run = 'py main.py'
+run = 'streamlit run main.py'
 # python
 py_local = "source .venv/bin/activate"
