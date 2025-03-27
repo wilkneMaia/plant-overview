@@ -15,7 +15,7 @@ def create_card(
     box_shadow: str = "0 4px 8px 0 rgba(0,0,0,0.3)",
     padding: str = "15px",
     margin: str = "15px 0",
-    border_left_width: str = "5px"
+    border_left_width: str = "5px",
 ) -> str:
     """
     Gera um card HTML altamente customizável para uso no Streamlit.
@@ -86,10 +86,12 @@ def create_card(
         # Adiciona divisor apenas entre linhas
         border_style = (
             f"border-bottom: 1px solid {divider_color}; padding-bottom: 10px;"
-            if i < len(rows) - 1 else ""
+            if i < len(rows) - 1
+            else ""
         )
 
-        rows_html.append(f"""
+        rows_html.append(
+            f"""
         <div style="
             display: flex;
             align-items: center;
@@ -114,7 +116,8 @@ def create_card(
                 {row['unit']}
             </span>
         </div>
-        """)
+        """
+        )
 
     # Template do card
     return f"""
@@ -146,3 +149,73 @@ def create_card(
         </div>
     </div>
     """
+
+
+def create_card_html(title, rows):
+    """
+    Gera um card estilizado com divider abaixo do título
+
+    Args:
+        title (str): Título do card
+        rows (list): Lista de dicionários com {icon, label, value, unit}
+
+    Returns:
+        str: HTML completo do card
+    """
+    # CSS inline atualizado
+    css = """
+    <style>
+    .energy-card {
+        border-radius: 10px;
+        padding: 15px;
+        margin: 15px 0;
+        background: linear-gradient(135deg, #0F2027 0%, #203A43 100%);
+        color: white;
+        font-family: Arial;
+        border-left: 5px solid #4CAF50;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .card-row {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #333;
+    }
+    .card-row:last-child {
+        border-bottom: none !important;
+    }
+    .card-title {
+        text-align: center;
+        color: #4CAF50;
+        margin-bottom: 15px;
+        font-size: 1.2em;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #333;  /* Adiciona o divider */
+        position: relative;
+    }
+    </style>
+    """
+
+    # Gera o conteúdo das linhas (mantido igual)
+    rows_html = ""
+    for row in rows:
+        rows_html += f"""
+        <div class="card-row">
+            <img src="data:image/svg+xml;base64,{row['icon']}"
+                 style="width: 20px; height: 20px; margin-right: 10px;">
+            <span style="flex: 1; color: #E0E0E0;"><strong>{row['label']}</strong></span>
+            <span style="font-weight: bold; color: #4CAF50; margin-right: 5px;">{row['value']}</span>
+            <span style="color: #B0B0B0; font-size: 0.9em;">{row['unit']}</span>
+        </div>
+        """
+
+    # HTML completo (mantido igual)
+    card_content = f"""
+    <div class="energy-card">
+        <div class="card-title">{title}</div>
+        {rows_html}
+    </div>
+    """
+
+    return css + card_content
