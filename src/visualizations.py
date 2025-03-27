@@ -5,11 +5,12 @@ import os
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from components.custom_card import create_card
+import streamlit.components.v1 as components
 
 # Caminho base para os ícones
 base_dir = os.path.dirname(os.path.abspath(__file__))
 icons_dir = os.path.join(base_dir, "../assets/icons")
-
 
 def get_card_style():
     """Retorna o estilo CSS para os cards."""
@@ -360,50 +361,41 @@ def display_total_performance_indicators(df):
     )
     std_dev_energy = df["Energy"].std()
 
-    # HTML do card
-    card_content = f"""
-    <div class="card">
-        <div class="card-header">
-            <h3>Visão geral da usina</h3>
-            <hr>
-        </div>
-        <div class="card-content">
-            <div class="row">
-                <img src="data:image/svg+xml;base64,{images_base64['icon-power-month']}" alt="Ícone Energia Mês" style="width: 20px; height: 20px; margin-right: 10px; margin-left: 5px;">
-                <span class="label"><strong>Energia este mês:</strong></span>
-                <span class="value">{locale.format_string('%.2f', current_month_energy_mwh, grouping=True)}</span>
-                <span class="title">kWh</span>
-            </div>
-            <div class="row">
-                <img src="data:image/svg+xml;base64,{images_base64['icon-power-year']}" alt="Ícone Energia Ano" style="width: 20px; height: 20px; margin-right: 10px; margin-left: 5px;">
-                <span class="label"><strong>Energia este ano:</strong></span>
-                <span class="value">{locale.format_string('%.2f', current_year_energy_mwh, grouping=True)}</span>
-                <span class="title">kWh</span>
-            </div>
-            <div class="row">
-                <img src="data:image/svg+xml;base64,{images_base64['icon-power-total']}" alt="Ícone Energia Total" style="width: 20px; height: 20px; margin-right: 10px; margin-left: 5px;">
-                <span class="label"><strong>Energia Total:</strong></span>
-                <span class="value">{locale.format_string('%.2f', total_energy_mwh, grouping=True)}</span>
-                <span class="title">MWh</span>
-            </div>
-            <div class="row">
-                <img src="data:image/svg+xml;base64,{images_base64['icon-power-year']}" alt="Ícone Desvio Padrão" style="width: 20px; height: 20px; margin-right: 10px; margin-left: 5px;">
-                <span class="label"><strong>Desvio Padrão:</strong></span>
-                <span class="value">{locale.format_string('%.2f', std_dev_energy, grouping=True)}</span>
-                <span class="title">kWh</span>
-            </div>
-            <div class="row">
-                <img src="data:image/svg+xml;base64,{images_base64['icon-power-year']}" alt="Ícone Eficiência" style="width: 20px; height: 20px; margin-right: 10px; margin-left: 5px;">
-                <span class="label"><strong>Eficiência (%):</strong></span>
-                <span class="value">{locale.format_string('%.2f', efficiency, grouping=True)}</span>
-                <span class="title">%</span>
-            </div>
-        </div>
-    </div>
-    """
+    rows_data = [
+        {
+            "icon": images_base64["icon-power-month"],
+            "label": "Energia este mês:",
+            "value": locale.format_string('%.2f', current_month_energy_mwh, grouping=True),
+            "unit": "kWh",
+        },
+        {
+            "icon": images_base64["icon-power-year"],
+            "label": "Energia este ano:",
+            "value": locale.format_string('%.2f', current_year_energy_mwh, grouping=True),
+            "unit": "kWh",
+        },
+        {
+            "icon": images_base64["icon-power-total"],
+            "label": "Energia Total:",
+            "value": locale.format_string('%.2f', total_energy_mwh, grouping=True),
+            "unit": "MWh",
+        },
+        {
+            "icon": images_base64["icon-power-year"],
+            "label": "Desvio Padrão:",
+            "value": locale.format_string('%.2f', std_dev_energy, grouping=True),
+            "unit": "kWh",
+        },
+        {
+            "icon": images_base64["icon-power-year"],
+            "label": "Eficiência (%):",
+            "value": locale.format_string('%.2f', efficiency, grouping=True),
+            "unit": "%",
+        },
+    ]
 
-    # Renderizar o card no Streamlit
-    st.markdown(card_content, unsafe_allow_html=True)
+    card = create_card("Energia", rows_data)
+    components.html(card, height=400)
 
 
 def display_revenue_summary(df):
@@ -422,70 +414,49 @@ def display_revenue_summary(df):
     total_revenue = total_energy_kwh * electricity_price_per_kwh
     current_month_revenue = current_month_energy_kwh * electricity_price_per_kwh
 
-    # HTML do card
-    card_content = f"""
-    <div class="card">
-        <div class="card-header">
-            <h3>Receita da usina</h3>
-            <hr>
-        </div>
-        <div class="card-content">
-            <div class="row">
-                <img src="data:image/svg+xml;base64,{images_base64['icon-income-today']}" alt="Ícone Receita Mês" style="width: 20px; height: 20px; margin-right: 10px; margin-left: 5px;">
-                <span class="label"><strong>Este mês:</strong></span>
-                <span class="value">
-                    <span class="title">R$</span> {locale.format_string('%.2f', current_month_revenue, grouping=True)}
-                </span>
-            </div>
-            <div class="row">
-                <img src="data:image/svg+xml;base64,{images_base64['icon-income-month']}" alt="Ícone Receita Total" style="width: 20px; height: 20px; margin-right: 10px; margin-left: 5px;">
-                <span class="label"><strong>Total:</strong></span>
-                <span class="value">
-                    <span class="title">R$</span> {locale.format_string('%.2f', total_revenue, grouping=True)}
-                </span>
-            </div>
-        </div>
-    </div>
-    """
+    # Dados para o card
+    rows_data = [
+        {
+            "icon": images_base64["icon-income-today"],
+            "label": "Este mês:",
+            "value": locale.format_string('%.2f', current_month_revenue, grouping=True),
+            "unit": "R$",
+        },
+        {
+            "icon": images_base64["icon-income-month"],
+            "label": "Total:",
+            "value": locale.format_string('%.2f', total_revenue, grouping=True),
+            "unit": "R$",
+        },
+    ]
 
-    # Renderizar o card no Streamlit
-    st.markdown(card_content, unsafe_allow_html=True)
+    card_html = create_card("Receita da Usina", rows_data)
+    components.html(card_html, height=200)  # Altura ajustável conforme necessário
 
 
 def display_environmental_benefits(df):
-    """Exibe os benefícios ambientais com base nos dados de energia."""
-
-    # Cálculos principais
+    """Exibe os benefícios ambientais com cards renderizados corretamente."""
+    # Cálculos
     total_energy_kwh = df["Energy"].sum()
-    co2_emission_factor = 1.0  # kg de CO2 evitados por kWh
-    carbon_absorption_per_tree = 18.32  # kg de CO2 absorvidos por árvore por ano
+    total_co2_reduction_ton = (total_energy_kwh * 1.0) / 1000  # 1 kg CO2/kWh
+    total_trees = total_energy_kwh * 1.0 / 18.32  # 18.32 kg CO2/árvore/ano
 
-    total_co2_reduction_ton = (total_energy_kwh * co2_emission_factor) / 1000
-    total_trees = total_energy_kwh * co2_emission_factor / carbon_absorption_per_tree
+    # Dados para o card
+    rows_data = [
+        {
+            "icon": images_base64["icon-co2"],
+            "label": "Redução da emissão de CO2:",
+            "value": f"{total_co2_reduction_ton:,.2f}",
+            "unit": "Tonelada(s)",
+        },
+        {
+            "icon": images_base64["icon-tree"],
+            "label": "Neutralização de carbono:",
+            "value": f"{total_trees:,.2f}",
+            "unit": "Árvores",
+        },
+    ]
 
-    # HTML do card
-    card_content = f"""
-    <div class="card">
-        <div class="card-header">
-            <h3>Benefícios ambientais</h3>
-            <hr>
-        </div>
-        <div class="card-content">
-            <div class="row">
-                <img src="data:image/svg+xml;base64,{images_base64['icon-co2']}" alt="Ícone CO2" style="width: 20px; height: 20px; margin-right: 10px; margin-left: 5px;">
-                <span class="label"><strong>Redução da emissão de CO2:</strong></span>
-                <span class="value">{locale.format_string('%.2f', total_co2_reduction_ton, grouping=True)}</span>
-                <span class="title">Tonelada(s)</span>
-            </div>
-            <div class="row">
-                <img src="data:image/svg+xml;base64,{images_base64['icon-tree']}" alt="Ícone Árvore" style="width: 20px; height: 20px; margin-right: 10px; margin-left: 5px;">
-                <span class="label"><strong>Neutralização de carbono:</strong></span>
-                <span class="value">{locale.format_string('%.2f', total_trees, grouping=True)}</span>
-                <span class="title">Árvores</span>
-            </div>
-        </div>
-    </div>
-    """
-
-    # Renderizar o card no Streamlit
-    st.markdown(card_content, unsafe_allow_html=True)
+    # Gerar e renderizar o card
+    card_html = create_card("Benefícios Ambientais", rows_data)
+    components.html(card_html, height=200)  # Altura ajustável conforme necessário

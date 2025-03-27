@@ -5,6 +5,7 @@ from visualizations import display_home_page
 
 
 def main():
+    # st.set_page_config(layout="wide", page_theme="dark")
     st.set_page_config(
         page_title="Dashboard de Geração de Energia",
         page_icon="🌳",
