@@ -10,6 +10,7 @@ python = "^3.11"
 pandas = "^2.2.3"
 streamlit = "^1.44.0"
 plotly = "^6.0.1"
+helper-utils = "^0.0.8"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.3.2"
@@ -22,6 +23,7 @@ isort = "^6.0.1"
 freezegun = "^1.5.1"
 black = "^25.1.0"
 autoflake = "^2.3.1"
+ipykernel = "^6.29.5"
 
 [build-system]
 requires = ["poetry-core"]
@@ -44,14 +46,33 @@ pythonpath = "."
 addopts = '-p no:warnings'
 
 [tool.taskipy.tasks]
-# lint
-lint = 'ruff . && black --check . --diff && isort --check . --diff'
-format = 'autoflake --remove-all-unused-imports --recursive --in-place . && black --line-length 80 . && isort --line-length 80 .'
-# tests
-pre_tests = 'task lint'
-tests_dev = 'ENVIRONMENT=development pytest -s -x -vv'
-tests = 'pytest -s -x --cov=app -vv'
-# run
-run = 'streamlit run main.py'
-# python
-py_local = "source .venv/bin/activate"
+# --- Lint & Formatação ---
+lint = """
+    ruff check . &&
+    black --check . &&
+    isort --check . &&
+    mypy --strict --follow-imports=silent --show-error-codes .
+"""
+format = """
+    autoflake --remove-all-unused-imports --remove-unused-variables --recursive --in-place . &&
+    isort --profile=black . &&
+    black --quiet . &&
+    ruff check --fix --exit-zero .
+"""
+fix = "ruff check --fix . && task format"  # Novo: Corrige automaticamente problemas simples
+
+# --- Testes ---
+test = "pytest -x --cov=app --cov-report=term-missing"  # Mostra linhas não cobertas
+test_ci = "pytest -x --cov=app --cov-report=xml"        # Saída em XML para CI (GitHub Actions, etc.)
+test_watch = "ptw -- -x --cov=app"                      # pytest-watch (instale com `pytest-watch`)
+
+# --- Ambiente ---
+venv = "source .venv/bin/activate"                      # Mais claro que 'py_local'
+clean = "find . -type f -name '*.pyc' -delete && find . -type d -name '__pycache__' -exec rm -rf {} +"  # Limpa cache
+
+# --- Streamlit ---
+run = "streamlit run app.py"
+run_dev = "ENVIRONMENT=development streamlit run app.py"  # Modo desenvolvimento
+
+# --- Instalação ---
+install_dev = "poetry install --with dev"                # Instala dependências de dev

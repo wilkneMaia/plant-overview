@@ -1,6 +1,6 @@
 import streamlit as st
-
 from data_loader import load_data
+
 from visualizations import display_home_page
 
 
@@ -12,9 +12,7 @@ def main():
         layout="wide",
     )
 
-    uploaded_file = st.sidebar.file_uploader(
-        "Selecione um arquivo CSV", type="csv"
-    )
+    uploaded_file = st.sidebar.file_uploader("Selecione um arquivo CSV", type="csv")
 
     if uploaded_file is not None:
         df = load_data(uploaded_file)

@@ -43,9 +43,6 @@ images_base64 = {
     ),
     "icon-co2": load_image_as_base64(os.path.join(icons_dir, "icon-co2.svg")),
     "icon-tree": load_image_as_base64(os.path.join(icons_dir, "icon-tree.svg")),
-    "icon_energy": load_image_as_base64(
-        os.path.join(icons_dir, "icon-energy.svg")
-    ),
     # Adicione mais imagens conforme necessário
 }
 
@@ -170,17 +167,13 @@ def display_total_performance_indicators(df):
         {
             "icon": images_base64["icon-power-total"],
             "label": "Energia Total:",
-            "value": locale.format_string(
-                "%.2f", total_energy_mwh, grouping=True
-            ),
+            "value": locale.format_string("%.2f", total_energy_mwh, grouping=True),
             "unit": "MWh",
         },
         {
             "icon": images_base64["icon-power-year"],
             "label": "Desvio Padrão:",
-            "value": locale.format_string(
-                "%.2f", std_dev_energy, grouping=True
-            ),
+            "value": locale.format_string("%.2f", std_dev_energy, grouping=True),
             "unit": "kWh",
         },
         {
@@ -216,9 +209,7 @@ def display_revenue_summary(df):
         {
             "icon": images_base64["icon-income-today"],
             "label": "Este mês:",
-            "value": locale.format_string(
-                "%.2f", current_month_revenue, grouping=True
-            ),
+            "value": locale.format_string("%.2f", current_month_revenue, grouping=True),
             "unit": "R$",
         },
         {
@@ -230,9 +221,7 @@ def display_revenue_summary(df):
     ]
 
     card_html = create_card("Receita da Usina", rows_data)
-    components.html(
-        card_html, height=200
-    )  # Altura ajustável conforme necessário
+    components.html(card_html, height=200)  # Altura ajustável conforme necessário
 
 
 def display_environmental_benefits(df):
@@ -260,6 +249,4 @@ def display_environmental_benefits(df):
 
     # Gerar e renderizar o card
     card_html = create_card("Benefícios Ambientais", rows_data)
-    components.html(
-        card_html, height=200
-    )  # Altura ajustável conforme necessário
+    components.html(card_html, height=200)  # Altura ajustável conforme necessário
