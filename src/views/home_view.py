@@ -5,7 +5,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from components.custom_card import create_card
-from utils.helpers import load_icon_as_base64, validate_icon
+from utils.helpers import load_icon_as_base64
 from config.constants import Icons, EnergyFactors, EconomicFactors, SystemFactors
 
 
