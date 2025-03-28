@@ -5,10 +5,6 @@ from pathlib import Path
 
 from config.constants import ICONS_DIR, LocaleSettings
 
-# Configura logging
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger(__name__)
-
 
 @lru_cache(maxsize=32)
 def load_icon_as_base64(icon_name: str) -> str:
