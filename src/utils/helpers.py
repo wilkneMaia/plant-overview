@@ -1,12 +1,14 @@
 import base64
 import locale
-import os
 from functools import lru_cache
+from pathlib import Path
+
 from config.constants import ICONS_DIR, LocaleSettings
 
 # Configura logging
 # logging.basicConfig(level=logging.INFO)
 # logger = logging.getLogger(__name__)
+
 
 @lru_cache(maxsize=32)
 def load_icon_as_base64(icon_name: str) -> str:
@@ -26,8 +28,8 @@ def load_icon_as_base64(icon_name: str) -> str:
 
 def validate_icon(icon_name: str) -> str:
     """Verifica se o ícone existe antes de carregá-lo."""
-    icon_path = os.path.join(ICONS_DIR, icon_name)
-    return icon_name if os.path.isfile(icon_path) else "icon-default.svg"
+    icon_path = Path(ICONS_DIR) / icon_name
+    return icon_name if icon_path.is_file() else "icon-default.svg"
 
 
 def setup_locale() -> bool:
@@ -42,6 +44,7 @@ def setup_locale() -> bool:
         except locale.Error:
             locale.setlocale(locale.LC_ALL, "")
             return False
+
 
 def format_currency(value: float) -> str:
     """Formata valores monetários com locale seguro."""

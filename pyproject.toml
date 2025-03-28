@@ -1,3 +1,7 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "plant-overview"
 version = "0.1.0"
@@ -11,68 +15,140 @@ pandas = "^2.2.3"
 streamlit = "^1.44.0"
 plotly = "^6.0.1"
 helper-utils = "^0.0.8"
+python-dotenv = "^1.1.0"
 
 [tool.poetry.group.dev.dependencies]
-autopep8 = "^2.3.2"
-python-dotenv = "^1.1.0"
+# Ferramentas de qualidade de código
+ruff = "^0.11.2"
+black = "^25.1.0"
+isort = "^6.0.1"
+autoflake = "^2.3.1"
+pylint = "^3.3.6"
+mypy = "^1.15.0"
+
+# Testes
 pytest = "^8.3.5"
 pytest-cov = "^6.0.0"
-taskipy = "^1.14.1"
-ruff = "^0.11.2"
-isort = "^6.0.1"
 freezegun = "^1.5.1"
-black = "^25.1.0"
-autoflake = "^2.3.1"
-ipykernel = "^6.29.5"
+pytest-mock = "^3.14.0"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+# Desenvolvimento
+ipykernel = "^6.29.5"
+jupyterlab = "^4.3.6"
+taskipy = "^1.14.1"
+streamlit-autorefresh = "^1.0.1"
+
+
+[tool.poetry.group.ci.dependencies]
+types-pyyaml = "^6.0.12.20250326"
 
 [tool.ruff]
-line-length = 79
-exclude = ['.venv', 'migrations']
+line-length = 88
+target-version = "py311"
+exclude = [".venv", "migrations", "__pycache__"]
 
+# Configurações de linting
 [tool.ruff.lint]
-preview = true
-select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # isort
+    "UP",  # pyupgrade
+    "PL",  # pylint
+    "PT",  # pytest-style
+    "PTH", # pathlib
+    "RUF", # ruff-specific
+]
+ignore = [
+    "PTH118",
+    "RUF013",
+    "PLR0913",
+    "PLR2004",
+    "PLR0917",
+    "PTH123",
+    "PTH100",
+    "PLR6301",
+    "PTH120",
+    "E501",
+    "PLC0415",
+    "E722",
+    "F841",
+]
+preview = true # Ativa recursos em preview
 
 [tool.ruff.format]
 preview = true
-quote-style = 'single'
+quote-style = "single"
+docstring-code-format = true
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+preview = true
+
+[tool.isort]
+profile = "black"
+known_first_party = ["plant_overview"]
+line_length = 88
+force_sort_within_sections = true
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+disallow_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
 
 [tool.pytest.ini_options]
 pythonpath = "."
-addopts = '-p no:warnings'
+addopts = "-p no:warnings --cov=src --cov-report term-missing"
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
 
 [tool.taskipy.tasks]
-# --- Lint & Formatação ---
+# --- Análise de Código ---
 lint = """
     ruff check . &&
     black --check . &&
     isort --check . &&
-    mypy --strict --follow-imports=silent --show-error-codes .
+    mypy --strict --show-error-codes src
 """
+
 format = """
-    autoflake --remove-all-unused-imports --remove-unused-variables --recursive --in-place . &&
-    isort --profile=black . &&
-    black --quiet . &&
-    ruff check --fix --exit-zero .
+    # 1. Remove imports não utilizados
+    autoflake --remove-all-unused-imports --remove-unused-variables --recursive --in-place src
+
+    # 2. Organiza imports
+    isort src
+
+    # 3. Formatação padrão
+    black src
+
+    # 4. Correções automáticas do Ruff (com fallback)
+    ruff check --fix --exit-zero src || echo "Ruff fix completed with warnings"
 """
-fix = "ruff check --fix . && task format"  # Novo: Corrige automaticamente problemas simples
+audit = "safety check && bandit -r src"
 
 # --- Testes ---
-test = "pytest -x --cov=app --cov-report=term-missing"  # Mostra linhas não cobertas
-test_ci = "pytest -x --cov=app --cov-report=xml"        # Saída em XML para CI (GitHub Actions, etc.)
-test_watch = "ptw -- -x --cov=app"                      # pytest-watch (instale com `pytest-watch`)
-
-# --- Ambiente ---
-venv = "source .venv/bin/activate"                      # Mais claro que 'py_local'
-clean = "find . -type f -name '*.pyc' -delete && find . -type d -name '__pycache__' -exec rm -rf {} +"  # Limpa cache
+test = "pytest -x --cov=src --cov-report=term-missing"
+test-ci = "pytest -x --cov=src --cov-report=xml"
+test-watch = "ptw -- -x --cov=src"
 
 # --- Streamlit ---
-run = "streamlit run app.py"
-run_dev = "ENVIRONMENT=development streamlit run app.py"  # Modo desenvolvimento
+run = "streamlit run src/app.py"
+run-dev = "ENV=dev streamlit run src/app.py"
+run-prod = "ENV=prod streamlit run src/app.py"
 
-# --- Instalação ---
-install_dev = "poetry install --with dev"                # Instala dependências de dev
+# --- Utilitários ---
+clean = """
+    find . -type f -name '*.pyc' -delete &&
+    find . -type d -name '__pycache__' -exec rm -rf {} + &&
+    rm -rf .coverage .mypy_cache .pytest_cache
+"""
+docs = "pdoc src -o docs --force"

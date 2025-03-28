@@ -47,7 +47,7 @@ def main():
                 else:
                     st.error("O arquivo carregado não é um DataFrame válido.")
             except Exception as e:
-                st.error(f"Erro ao carregar arquivo: {str(e)}")
+                st.error(f"Erro ao carregar arquivo: {e!s}")
 
     # Verificação de dados carregados
     if "df" not in st.session_state or st.session_state.df is None:
