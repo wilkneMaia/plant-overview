@@ -28,7 +28,7 @@ def main():
         if uploaded_file is not None:
             try:
                 data = load_data(uploaded_file)
-                st.write(f"Tipo do objeto retornado: {type(data).__name__}")
+                # st.write(f"Tipo do objeto retornado: {type(data).__name__}")
                 st.session_state.df = data
 
                 if isinstance(data, pd.DataFrame):
