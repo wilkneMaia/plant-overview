@@ -19,17 +19,6 @@ class Router:
         view = HomeView()
         view.display(data)
 
-    # def _load_energy(self, data):
-    #     from views.energy_view import EnergyView
-    #     view = EnergyView()
-    #     view.display(data)
-
-    # def _load_environmental(self, data):
-
-    #     from views.environmental_view import EnvironmentalView
-    #     view = EnvironmentalView()
-    #     view.display(data)
-
     def _load_error_page(self):
         import streamlit as st
 

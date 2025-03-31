@@ -4,12 +4,13 @@ import streamlit as st
 from utils.load_data import load_data
 from utils.router import Router
 
+# ⚠️ DEVE SER O PRIMEIRO COMANDO STREAMLIT (antes de qualquer função/def)
+st.set_page_config(layout="wide", page_title="Sistema de Energia", page_icon="⚡")
+
 
 def main():
-    # Configurações gerais da aplicação
-    st.set_page_config(layout="wide", page_title="Sistema de Energia", page_icon="⚡")
-
     # Inicializa o roteador
+
     router = Router()
 
     # Sidebar - Menu de navegação e upload de arquivo
@@ -22,41 +23,29 @@ def main():
         )
 
         st.title("Configurações")
-
         uploaded_file = st.file_uploader("Faça upload do arquivo CSV", type=["csv"])
+
         if uploaded_file is not None:
             try:
-                data = load_data(uploaded_file)  # Chame a função corretamente
-                st.write(
-                    f"Tipo do objeto retornado: {type(data).__name__}"
-                )  # Exibe apenas o nome da classe
-                st.session_state.df = data  # Salve os dados no estado da sessão
+                data = load_data(uploaded_file)
+                st.write(f"Tipo do objeto retornado: {type(data).__name__}")
+                st.session_state.df = data
+
                 if isinstance(data, pd.DataFrame):
-                    # Verificação de sucesso
-                    st.success("O arquivo foi carregado com sucesso!")
-                    # st.write("Prévia dos dados carregados:")
-                    # st.dataframe(data.head())  # Exibe as primeiras linhas do DataFrame
-                    # Verificação de colunas
-                    # required_columns = ["Energy", "Year", "Month"]
-                    # if all(col in data.columns for col in required_columns):
-                    #     st.success("O arquivo contém todas as colunas necessárias!")
-                    # else:
-                    #     st.error(f"O arquivo está faltando as colunas necessárias: {required_columns}")
-                    # if not pd.api.types.is_numeric_dtype(data["Energy"]):
-                    #     st.error("A coluna 'Energy' não contém valores numéricos.")
+                    st.success("Arquivo carregado com sucesso!")
                 else:
-                    st.error("O arquivo carregado não é um DataFrame válido.")
+                    st.error("O arquivo não é um DataFrame válido.")
             except Exception as e:
                 st.error(f"Erro ao carregar arquivo: {e!s}")
 
-    # Verificação de dados carregados
+    # Verificação de dados
     if "df" not in st.session_state or st.session_state.df is None:
         st.warning("Por favor, carregue um arquivo CSV para continuar")
         return
 
-    # Roteamento para a página selecionada
+    # Roteamento
     router.navigate(selected, st.session_state.df)
 
 
 if __name__ == "__main__":
-    main()
+    main()  # Chamada da função principal

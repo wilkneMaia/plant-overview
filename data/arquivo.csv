@@ -1,4 +1,4 @@
-ID,Plant Name,Date,SN,Port,Energy (kWh),Microinversor
+ID,Plant Name,Date,SN,Port,Energy,Microinversor
 1,Wilkne,2024-11-27,106272403152,1,2.131,Microinversor_1
 2,Wilkne,2024-11-27,106272403152,2,2.109,Microinversor_1
 3,Wilkne,2024-11-27,106272403152,3,2.105,Microinversor_1
