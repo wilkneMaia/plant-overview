@@ -3,7 +3,7 @@ class Router:
         self.pages = {
             "Home": self._load_home,
             # "Energia": self._load_energy,
-            # "Ambiental": self._load_environmental
+            # "Ano": self._load_environmental
         }
 
     def navigate(self, page_name, data):

@@ -3,10 +3,10 @@ import streamlit as st
 
 from components.charts import (
     create_microinverter_year_barchart,
-    create_microinverter_year_heatmap,
-    plot_area_overlay_by_year,
+    plot_energy_heatmap_by_microinverter,
+    plot_energy_production_by_year,
+    plot_energy_trend_by_year,
     plot_line_comparison_by_year,
-    plot_total_by_year,
 )
 from config.styles import setup_shared_styles
 
@@ -101,10 +101,10 @@ class HomeView:
         """Visualizações de evolução anual"""
         col1, col2 = st.columns(2)
         with col1:
-            plot_total_by_year(data)
+            plot_energy_production_by_year(data)
 
         with col2:
-            plot_area_overlay_by_year(data)
+            plot_energy_trend_by_year(data)
 
         plot_line_comparison_by_year(data)
 
@@ -114,17 +114,13 @@ class HomeView:
             st.warning("Nenhum dado disponível com os filtros atuais")
             return
 
-        # tab1, tab2 = st.tabs(["🗺️ Heatmap", "📊 Comparativo"])
-
-        # with tab1:
         fig_heatmap = create_microinverter_year_barchart(data)
         if fig_heatmap:
             st.plotly_chart(fig_heatmap, use_container_width=True)
         else:
             st.warning("Não foi possível gerar o heatmap")
 
-        # with tab2:
-        chart = create_microinverter_year_heatmap(data)
+        chart = plot_energy_heatmap_by_microinverter(data)
         if chart:
             st.plotly_chart(chart, use_container_width=True)
         else:

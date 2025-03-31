@@ -26,7 +26,7 @@ def main():
         with st.expander("🗂️ Navegação", expanded=True):
             selected = st.radio(
                 "Selecione a página",
-                options=["Home", "Energia", "Ambiental"],
+                options=["Home", "Semana", "Mês", "Ano"],
                 key="page_selector",
                 label_visibility="collapsed",
             )
