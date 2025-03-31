@@ -2,6 +2,11 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
+from components.charts import (
+    plot_area_overlay_by_year,
+    plot_comparative_months_by_year_line,
+    plot_total_by_year,
+)
 from components.custom_card import create_card
 from config.constants import EconomicFactors, EnergyFactors, Icons, SystemFactors
 from utils.helpers import load_icon_as_base64
@@ -12,13 +17,22 @@ class HomeView:
         """Exibe um resumo total dos dados de energia"""
 
         col1, col2, col3 = st.columns(3)
-
         with col1:
             card_total_performance_indicators(data)
         with col2:
             card_revenue_summary(data)
         with col3:
             card_environmental_benefits(data)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            plot_total_by_year(data)
+        with col2:
+            plot_comparative_months_by_year_line(data)
+            plot_area_overlay_by_year(data)
+            # plot_area_stack_by_year(data)
+            # plot_scatter_by_year(data)
+            # plot_candlestick_by_month(data)
 
 
 def card_total_performance_indicators(df: pd.DataFrame) -> None:
