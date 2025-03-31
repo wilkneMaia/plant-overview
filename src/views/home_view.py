@@ -4,8 +4,9 @@ import streamlit.components.v1 as components
 
 from components.charts import (
     plot_area_overlay_by_year,
-    plot_comparative_months_by_year_line,
     plot_total_by_year,
+    plot_line_comparison_by_year,
+    plot_grouped_bar_comparison,
 )
 from components.custom_card import create_card
 from config.constants import EconomicFactors, EnergyFactors, Icons, SystemFactors
@@ -27,9 +28,14 @@ class HomeView:
         col1, col2 = st.columns(2)
         with col1:
             plot_total_by_year(data)
-        with col2:
-            plot_comparative_months_by_year_line(data)
             plot_area_overlay_by_year(data)
+
+        with col2:
+            plot_grouped_bar_comparison(data)
+            plot_line_comparison_by_year(data)
+
+
+            # plot_comparative_months_by_year_line(data)
             # plot_area_stack_by_year(data)
             # plot_scatter_by_year(data)
             # plot_candlestick_by_month(data)
