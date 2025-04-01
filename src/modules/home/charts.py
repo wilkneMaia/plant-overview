@@ -2,37 +2,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-# Paleta principal verde para séries individuais
-PRIMARY_GREEN = "#00A878"  # Verde vibrante principal
-
-# TODO: Esterilizar as paletas de cores para serem usadas em todos os gráficos
-# Paleta de verdes sequenciais para gradientes
-GREEN_SEQUENTIAL = [
-    "#e0f5ee",
-    "#c1e9db",
-    "#a2dec9",
-    "#83d3b6",
-    "#64c8a4",
-    "#45bd91",
-    "#26b27f",
-    "#07a76c",
-    "#059059",
-    "#047a47",
-]
-
-# Paleta para múltiplas séries (discretas) com variações de verde e cores complementares
-GREEN_DISCRETE = [
-    "#00A878",  # Verde principal (mais vibrante)
-    "#004B49",  # Verde profundo (contraste máximo)
-    "#7DCD85",  # Verde claro
-    "#027357",  # Verde escuro
-    "#C6EBBE",  # Verde pálido
-    "#36877A",  # Verde-petróleo
-    "#4ECDC4",  # Verde-água
-    "#87D37C",  # Verde médio
-    "#B5EAD7",  # Verde menta
-    "#C4E0B0",  # Verde pastel
-]
+from config.constants import Colors
 
 
 def plot_energy_heatmap_by_microinverter(data):
@@ -56,7 +26,7 @@ def plot_energy_heatmap_by_microinverter(data):
         fig = px.imshow(
             df_agg,
             labels=dict(x="Ano", y="Microinversor", color="Energia (kWh)"),
-            color_continuous_scale=GREEN_SEQUENTIAL,
+            color_continuous_scale=Colors.GREEN_SEQUENTIAL,
             aspect="auto",
             text_auto=".1f",
         )
@@ -100,7 +70,7 @@ def plot_line_comparison_by_year(df):
             title="Comparativo de Geração por Mês e Ano",
             labels={"Month": "Mês", "Energy": "Energia Gerada (kWh)", "Year": "Ano"},
             template="plotly_dark",
-            color_discrete_sequence=GREEN_DISCRETE,  # Alterado para nossa paleta de verdes
+            color_discrete_sequence=Colors.GREEN_DISCRETE,  # Alterado para nossa paleta de verdes
         )
 
         # Customiza aparência
@@ -122,8 +92,8 @@ def plot_line_comparison_by_year(df):
                 x1=12,
                 y1=year_avg,
                 line=dict(
-                    color=GREEN_DISCRETE[
-                        i % len(GREEN_DISCRETE)
+                    color=Colors.GREEN_DISCRETE[
+                        i % len(Colors.GREEN_DISCRETE)
                     ],  # Usa nossa paleta de verdes
                     width=1.5,
                     dash="dash",
@@ -221,7 +191,7 @@ def plot_energy_trend_by_year(df):
             title="Comparativo de Energia por Mês e Ano",
             labels={"Month": "Mês", "Energy": "Energia Gerada (kWh)", "Year": "Ano"},
             template="plotly_dark",
-            color_discrete_sequence=GREEN_DISCRETE,  # Alterado para nossa paleta de verdes
+            color_discrete_sequence=Colors.GREEN_DISCRETE,  # Alterado para nossa paleta de verdes
         )
         # Aplica as customizações
         fig.update_traces(
@@ -325,7 +295,7 @@ def plot_microinverter_year_barchart(data):
             color="Microinversor",
             barmode="group",
             title="<b>Distribuição de Energia por Ano</b><br><sup>Microinversores com produção > 0</sup>",
-            color_discrete_sequence=GREEN_DISCRETE,
+            color_discrete_sequence=Colors.GREEN_DISCRETE,
             text_auto=".2s",
             labels={"Energy": "Energia (kWh)", "Year": "Ano"},
             category_orders={"Year": sorted(df_agg["Year"].unique())},
@@ -406,7 +376,7 @@ def create_bar_chart(
     ylabel: str = None,
     template: str = "plotly_dark",
     margin: dict = None,
-    color: str = PRIMARY_GREEN,
+    color: str = Colors.PRIMARY_GREEN,
     show_values: bool = True,
     **layout_kwargs,
 ):
@@ -491,7 +461,7 @@ def plot_energy_production_by_year(df: pd.DataFrame) -> None:
             return
 
         total_data = df.groupby("Year")["Energy"].sum().reset_index()
-        colorscale = GREEN_SEQUENTIAL  # Usando nossa paleta verde sequencial
+        colorscale = Colors.GREEN_SEQUENTIAL
 
         # Normaliza os valores para a escala de cores
         min_energy = total_data["Energy"].min()

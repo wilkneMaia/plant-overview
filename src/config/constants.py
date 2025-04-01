@@ -50,3 +50,34 @@ class SystemFactors:
     MWH_CONVERSION_FACTOR: Final[float] = 1000.0  # kWh → MWh
     OPERATIONAL_HOURS_PER_DAY: Final[int] = 24  # horas/dia
     NOMINAL_EFFICIENCY: Final[float] = 0.85  # 85% (valor de referência)
+
+
+# --- Colores ---
+class Colors:
+    PRIMARY: Final[str] = "#00aaff"
+    SECONDARY: Final[str] = "#00ffff"
+    PRIMARY_GREEN: Final[str] = "#00A878"
+    GREEN_SEQUENTIAL: Final[list[str]] = [
+        "#e0f5ee",
+        "#c1e9db",
+        "#a2dec9",
+        "#83d3b6",
+        "#64c8a4",
+        "#45bd91",
+        "#26b27f",
+        "#07a76c",
+        "#059059",
+        "#047a47",
+    ]
+    GREEN_DISCRETE: Final[list[str]] = [
+        "#00A878",  # Verde principal (mais vibrante)
+        "#004B49",  # Verde profundo (contraste.maxcdn)
+        "#7DCD85",  # Verde claro
+        "#027357",  # Verde escuro
+        "#C6EBBE",  # Verde pálido
+        "#36877A",  # Verde-petróleo
+        "#4ECDC4",  # Verde-água
+        "#87D37C",  # Verde médio
+        "#C7F9CC",  # Verde limão
+        "#E3F5E8",  # Verde limão claro
+    ]
