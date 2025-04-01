@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Base principal - representa um microinversor -->
+  <rect x="2" y="8" width="8" height="12" rx="1" />
+  <!-- Segundo dispositivo -->
+  <rect x="14" y="8" width="8" height="12" rx="1" />
+  <!-- Conectores superiores -->
+  <line x1="6" y1="4" x2="6" y2="8" />
+  <line x1="18" y1="4" x2="18" y2="8" />
+  <!-- Linha de conexão entre dispositivos -->
+  <line x1="6" y1="4" x2="18" y2="4" />
+  <!-- Indicadores de status/energia nos dispositivos -->
+  <circle cx="6" cy="12" r="1" />
+  <circle cx="18" cy="12" r="1" />
+  <!-- Conectores de energia na base -->
+  <line x1="4" y1="20" x2="4" y2="22" />
+  <line x1="8" y1="20" x2="8" y2="22" />
+  <line x1="16" y1="20" x2="16" y2="22" />
+  <line x1="20" y1="20" x2="20" y2="22" />
+</svg>

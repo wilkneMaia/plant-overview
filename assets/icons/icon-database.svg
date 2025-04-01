@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Camada superior do banco de dados -->
+  <ellipse cx="12" cy="5" rx="9" ry="3" />
+  <!-- Camada do meio do banco de dados -->
+  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+  <!-- Camada inferior do banco de dados -->
+  <path d="M21 19c0 1.66-4 3-9 3s-9-1.34-9-3" />
+  <!-- Linhas laterais conectando as camadas -->
+  <path d="M3 5v14" />
+  <path d="M21 5v14" />
+  <!-- Linhas representando registros de dados -->
+  <line x1="6" y1="9" x2="18" y2="9" stroke-width="1" />
+  <line x1="6" y1="16" x2="18" y2="16" stroke-width="1" />
+</svg>

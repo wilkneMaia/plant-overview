@@ -29,6 +29,10 @@ class Icons:
     DEFAULT: IconName = "icon-default"
     INCOME_MONTH: IconName = "icon-income-month"
     INCOME_TODAY: IconName = "icon-income-today"
+    DATABASE = "icon-database"
+    DEVICES = "icon-devices"
+    CALENDAR = "icon-calendar"
+    PERFORMANCE = "icon-performance"
 
 
 # --- Fatores ---

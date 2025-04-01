@@ -153,15 +153,15 @@ def create_card(
 
 def create_card_html(title: str, rows: list, footer: str = None) -> str:
     """
-    Gera um card estilizado com design moderno e interativo
+    Gera um card estilizado com design moderno e interativo.
 
     Args:
-        title (str): Título do card com ícone opcional (ex: "📈 Performance")
-        rows (list): Lista de dicionários com {icon, label, value, unit, trend, help}
-        help_text (str): Texto de ajuda opcional no rodapé
+        title (str): Título do card com ícone opcional (ex: "📈 Performance").
+        rows (list): Lista de dicionários com {icon, label, value, unit, trend, help}.
+        footer (str, opcional): Texto de rodapé. Se None, o rodapé não será exibido.
 
     Returns:
-        str: HTML completo do card com CSS inline
+        str: HTML completo do card com CSS inline.
     """
     # CSS modernizado com variáveis e animações
     css = """
@@ -310,23 +310,16 @@ def create_card_html(title: str, rows: list, footer: str = None) -> str:
         </div>
         """
 
-    # HTML completo com footer opcional
-    footer_html = (
-        f"""
-    <div style="
-        margin-top: 15px;
-        padding-top: 10px;
-        font-size: 0.8rem;
-        color: #888;
-        border-top: 1px solid #333;
-    ">
-        {footer}
-    </div>
-    """
-        if footer
-        else ""
-    )
+    # Adiciona o rodapé apenas se fornecido
+    footer_html = ""
+    if footer:
+        footer_html = f"""
+        <div class="card-footer">
+            {footer}
+        </div>
+        """
 
+    # HTML completo do card
     card_content = f"""
     <div class="energy-card">
         <div class="card-title">{title}</div>
