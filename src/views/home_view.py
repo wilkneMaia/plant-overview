@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 from components.charts import (
     create_microinverter_year_barchart,
@@ -8,7 +9,10 @@ from components.charts import (
     plot_energy_trend_by_year,
     plot_line_comparison_by_year,
 )
+from components.custom_card import create_card, create_card_html
+from config.constants import EconomicFactors, EnergyFactors, Icons
 from config.styles import setup_shared_styles
+from utils.helpers import load_icon_as_base64
 
 
 class HomeView:
@@ -63,29 +67,28 @@ class HomeView:
         ]
 
     def _display_kpi_cards(self, data: pd.DataFrame):
-        """Exibe os cards de métricas principais"""
+        """Exibe todos os cards métricos"""
+        # Cards principais (3 métricas)
         cols = st.columns(3)
         metrics = [
+            ("Energia Total", f"{data['Energy'].sum():,.1f} kWh", "⚡ Produção total"),
+            ("Microinversores", data["Microinversor"].nunique(), "🔌 Unidades ativas"),
             (
-                "Energia Total",
-                f"{data['Energy'].sum():,.1f} kWh",
-                f"{data['Energy'].mean():,.1f} kWh/mês",
-            ),
-            (
-                "Microinversores Ativos",
-                data["Microinversor"].nunique(),
-                f"{len(data):,} registros",
-            ),
-            (
-                "Eficiência Média",
-                f"{(data['Energy'].sum() / data['Microinversor'].nunique()):,.1f} kWh/unid",
-                "+5.2% vs período anterior",
+                "Eficiência",
+                f"{data['Energy'].sum() / data['Microinversor'].nunique():,.1f} kWh/unid",
+                "📈 Performance",
             ),
         ]
 
-        for col, (title, value, delta) in zip(cols, metrics):
+        for col, (title, value, help_text) in zip(cols, metrics):
             with col:
-                st.metric(title, value, delta)
+                st.metric(title, value, help=help_text)
+
+        # Linha divisória
+        st.divider()
+
+        # Cards de receita e ambiental
+        self._display_metric_cards(data)
 
     def _display_main_visualizations(self, data: pd.DataFrame, show_details: bool):
         """Gerencia as visualizações principais"""
@@ -136,104 +139,174 @@ class HomeView:
                     use_container_width=True,
                 )
 
+    def card_revenue_summary(df: pd.DataFrame) -> None:
+        """Exibe resumo de receita com ícones padronizados."""
+        # Setup
+        # locale.setlocale(locale.LC_ALL, LOCALE_CURRENCY)
 
-# # -------------------- Funções de cards específicos -------------------
-# def card_total_performance_indicators(df: pd.DataFrame) -> None:
-#     """Exibe indicadores de desempenho da usina com cálculo otimizado e padrões consistentes."""
+        # Validação
+        required_columns = {"Energy", "Year", "Month"}
+        if not required_columns.issubset(df.columns):
+            raise ValueError(f"Colunas faltando: {required_columns - set(df.columns)}")
 
-#     # Cálculos principais (otimizados)
-#     energy_data = _calculate_energy_metrics(df)
-#     efficiency_metrics = _calculate_efficiency(df, energy_data["total_energy_kwh"])
+        # Cálculos
+        total_energy = df["Energy"].sum()
+        current_month_energy = _get_current_month_energy(df)
 
-#     # Construção dos cards
-#     rows_data = [
-#         _create_metric_row(
-#             icon=Icons.POWER_MONTH,
-#             label="Energia este mês:",
-#             value=energy_data["current_month_mwh"],
-#             unit="MWh",
-#         ),
-#         _create_metric_row(
-#             icon=Icons.POWER_YEAR,
-#             label="Energia este ano:",
-#             value=energy_data["current_year_mwh"],
-#             unit="MWh",
-#         ),
-#         _create_metric_row(
-#             icon=Icons.POWER_TOTAL,
-#             label="Energia Total:",
-#             value=energy_data["total_energy_mwh"],
-#             unit="MWh",
-#         ),
-#         _create_metric_row(
-#             icon=Icons.STATS,
-#             label="Desvio Padrão:",
-#             value=df["Energy"].std(),
-#             unit="kWh",
-#         ),
-#         _create_metric_row(
-#             icon=Icons.EFFICIENCY,
-#             label="Eficiência:",
-#             value=efficiency_metrics["efficiency"],
-#             unit="%",
-#         ),
-#     ]
+        rows_data = [
+            {
+                "icon": load_icon_as_base64(Icons.INCOME_TODAY),
+                "label": "Este mês:",
+                "value": (
+                    f"{current_month_energy * EconomicFactors.ELECTRICITY_PRICE_PER_KWH:,.2f}"
+                ),
+                "unit": "R$",
+            },
+            {
+                "icon": load_icon_as_base64(Icons.INCOME_MONTH),
+                "label": "Total:",
+                "value": (
+                    f"{total_energy * EconomicFactors.ELECTRICITY_PRICE_PER_KWH:,.2f}"
+                ),
+                "unit": "R$",
+            },
+        ]
+        components.html(create_card("Receita da Usina", rows_data), height=200)
 
-#     components.html(create_card("Desempenho da Usina", rows_data), height=400)
+    def card_environmental_benefits(df: pd.DataFrame) -> None:
+        """Exibe cards de benefícios ambientais."""
+        rows_data = [
+            {
+                "icon": load_icon_as_base64(Icons.CO2),
+                "label": "Redução de CO2:",
+                "value": (
+                    f"{(df['Energy'].sum() * EnergyFactors.CO2_KG_PER_KWH) / 1000:,.2f}"
+                ),
+                "unit": "Toneladas",
+            },
+            {
+                "icon": load_icon_as_base64(Icons.TREE),
+                "label": "Neutralização:",
+                "value": (
+                    f"{(df['Energy'].sum() * EnergyFactors.TREES_PER_KG_CO2):,.2f}"
+                ),
+                "unit": "Árvores",
+            },
+        ]
+        components.html(create_card("Benefícios Ambientais", rows_data), height=200)
 
+    def _get_current_month_energy(df: pd.DataFrame) -> float:
+        """Retorna energia do mês atual."""
+        current_year, current_month = pd.Timestamp.now().year, pd.Timestamp.now().month
+        return df[(df["Year"] == current_year) & (df["Month"] == current_month)][
+            "Energy"
+        ].sum()
 
-# def card_revenue_summary(df: pd.DataFrame) -> None:
-#     """Exibe resumo de receita com ícones padronizados."""
-#     # Setup
-#     # locale.setlocale(locale.LC_ALL, LOCALE_CURRENCY)
+    def _display_metric_cards(self, data: pd.DataFrame) -> None:
+        """Exibe todos os cards métricos (receita e benefícios ambientais) em layout organizado."""
+        # Validação inicial
+        required_cols = {"Energy", "Year", "Month"}
+        if missing := required_cols - set(data.columns):
+            st.error(f"Dados incompletos para cards. Faltam: {missing}")
+            return
 
-#     # Validação
-#     required_columns = {"Energy", "Year", "Month"}
-#     if not required_columns.issubset(df.columns):
-#         raise ValueError(f"Colunas faltando: {required_columns - set(df.columns)}")
+        # Layout com 2 colunas
+        col1, col2 = st.columns(2)
 
-#     # Cálculos
-#     total_energy = df["Energy"].sum()
-#     current_month_energy = _get_current_month_energy(df)
+        with col1:
+            self._display_revenue_card(data)
 
-#     rows_data = [
-#         {
-#             "icon": load_icon_as_base64(Icons.INCOME_TODAY),
-#             "label": "Este mês:",
-#             "value": (
-#                 f"{current_month_energy * EconomicFactors.ELECTRICITY_PRICE_PER_KWH:,.2f}"
-#             ),
-#             "unit": "R$",
-#         },
-#         {
-#             "icon": load_icon_as_base64(Icons.INCOME_MONTH),
-#             "label": "Total:",
-#             "value": f"{total_energy * EconomicFactors.ELECTRICITY_PRICE_PER_KWH:,.2f}",
-#             "unit": "R$",
-#         },
-#     ]
-#     components.html(create_card("Receita da Usina", rows_data), height=200)
+        with col2:
+            self._display_environmental_card(data)
 
+    def _display_environmental_card(self, data: pd.DataFrame) -> None:
+        """Card de impacto ambiental com visualização intuitiva."""
+        try:
+            total_energy = data["Energy"].sum()
+            co2_reduced = (total_energy * EnergyFactors.CO2_KG_PER_KWH) / 1000
+            trees_equivalent = total_energy * EnergyFactors.TREES_PER_KG_CO2
 
-# def card_environmental_benefits(df: pd.DataFrame) -> None:
-#     """Exibe cards de benefícios ambientais."""
-#     rows_data = [
-#         {
-#             "icon": load_icon_as_base64(Icons.CO2),
-#             "label": "Redução de CO2:",
-#             "value": (
-#                 f"{(df['Energy'].sum() * EnergyFactors.CO2_KG_PER_KWH) / 1000:,.2f}"
-#             ),
-#             "unit": "Toneladas",
-#         },
-#         {
-#             "icon": load_icon_as_base64(Icons.TREE),
-#             "label": "Neutralização:",
-#             "value": f"{(df['Energy'].sum() * EnergyFactors.TREES_PER_KG_CO2):,.2f}",
-#             "unit": "Árvores",
-#         },
-#     ]
-#     components.html(create_card("Benefícios Ambientais", rows_data), height=200)
+            rows = [
+                {
+                    "icon": load_icon_as_base64(Icons.CO2),
+                    "label": "Redução de CO₂:",
+                    "value": f"{co2_reduced:,.1f}",
+                    "unit": "Toneladas",
+                    "help": f"Equivalente a {co2_reduced * 1000:,.0f} kg",
+                },
+                {
+                    "icon": load_icon_as_base64(Icons.TREE),
+                    "label": "Neutralização:",
+                    "value": f"{trees_equivalent:,.0f}",
+                    "unit": "Árvores",
+                    "help": "Necessárias para absorver o CO₂",
+                },
+            ]
+
+            # Container para agrupar card e caption
+            with st.container():
+                # Card sem help_text interno
+                components.html(
+                    create_card_html(
+                        title="🌱 Impacto Ambiental",
+                        rows=rows,
+                        footer=f"Fator: {EnergyFactors.CO2_KG_PER_KWH}kg CO₂/kWh",
+                    ),
+                    height=420,  # Ajuste para acomodar o footer
+                )
+
+        except Exception as e:
+            st.error(f"Erro ao gerar card ambiental: {e!s}")
+
+    def _get_current_month_energy(self, df: pd.DataFrame) -> float:  # Adicione 'self'
+        """Retorna energia do mês atual."""
+        current_year, current_month = pd.Timestamp.now().year, pd.Timestamp.now().month
+        return df[(df["Year"] == current_year) & (df["Month"] == current_month)][
+            "Energy"
+        ].sum()
+
+    def _display_revenue_card(self, data: pd.DataFrame) -> None:
+        """Card de resumo financeiro com cálculos integrados."""
+        try:
+            total_energy = data["Energy"].sum()
+            current_month_energy = self._get_current_month_energy(
+                data
+            )  # Agora com self
+
+            rows = [
+                {
+                    "icon": load_icon_as_base64(Icons.INCOME_TODAY),
+                    "label": "Receita Mensal:",
+                    "value": (
+                        f"{current_month_energy * EconomicFactors.ELECTRICITY_PRICE_PER_KWH:,.2f}"
+                    ),
+                    "unit": "R$",
+                    "help": "Baseado na tarifa média de R$0,75/kWh",
+                },
+                {
+                    "icon": load_icon_as_base64(Icons.INCOME_MONTH),
+                    "label": "Receita Total:",
+                    "value": (
+                        f"{total_energy * EconomicFactors.ELECTRICITY_PRICE_PER_KWH:,.2f}"
+                    ),
+                    "unit": "R$",
+                    "help": "Acumulado no período selecionado",
+                },
+            ]
+
+            # Modificação para a função create_card sem footer
+            with st.container():
+                components.html(
+                    create_card_html(
+                        title="💰 Receita Financeira",
+                        rows=rows,
+                        footer=f"Tarifa: R${EconomicFactors.ELECTRICITY_PRICE_PER_KWH}/kWh",
+                    ),
+                    height=420,
+                )
+
+        except Exception as e:
+            st.error(f"Erro ao gerar card financeiro: {e!s}")
 
 
 # # --- Funções auxiliares ---
@@ -293,12 +366,49 @@ class HomeView:
 #     }
 
 
-# def _get_current_month_energy(df: pd.DataFrame) -> float:
-#     """Retorna energia do mês atual."""
-#     current_year, current_month = pd.Timestamp.now().year, pd.Timestamp.now().month
-#     return df[(df["Year"] == current_year) & (df["Month"] == current_month)][
-#         "Energy"
-#     ].sum()
+# -------------------- Funções de cards específicos -------------------
+# def card_total_performance_indicators(df: pd.DataFrame) -> None:
+#     """Exibe indicadores de desempenho da usina com cálculo otimizado e padrões consistentes."""
+
+#     # Cálculos principais (otimizados)
+#     energy_data = _calculate_energy_metrics(df)
+#     efficiency_metrics = _calculate_efficiency(df, energy_data["total_energy_kwh"])
+
+#     # Construção dos cards
+#     rows_data = [
+#         _create_metric_row(
+#             icon=Icons.POWER_MONTH,
+#             label="Energia este mês:",
+#             value=energy_data["current_month_mwh"],
+#             unit="MWh",
+#         ),
+#         _create_metric_row(
+#             icon=Icons.POWER_YEAR,
+#             label="Energia este ano:",
+#             value=energy_data["current_year_mwh"],
+#             unit="MWh",
+#         ),
+#         _create_metric_row(
+#             icon=Icons.POWER_TOTAL,
+#             label="Energia Total:",
+#             value=energy_data["total_energy_mwh"],
+#             unit="MWh",
+#         ),
+#         _create_metric_row(
+#             icon=Icons.STATS,
+#             label="Desvio Padrão:",
+#             value=df["Energy"].std(),
+#             unit="kWh",
+#         ),
+#         _create_metric_row(
+#             icon=Icons.EFFICIENCY,
+#             label="Eficiência:",
+#             value=efficiency_metrics["efficiency"],
+#             unit="%",
+#         ),
+#     ]
+
+#     components.html(create_card("Desempenho da Usina", rows_data), height=400)
 
 
 # def card_total_performance_indicators(df: pd.DataFrame) -> None:

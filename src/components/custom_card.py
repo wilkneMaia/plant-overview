@@ -151,70 +151,187 @@ def create_card(
     """
 
 
-def create_card_html(title, rows):
+def create_card_html(title: str, rows: list, footer: str = None) -> str:
     """
-    Gera um card estilizado com divider abaixo do título
+    Gera um card estilizado com design moderno e interativo
 
     Args:
-        title (str): Título do card
-        rows (list): Lista de dicionários com {icon, label, value, unit}
+        title (str): Título do card com ícone opcional (ex: "📈 Performance")
+        rows (list): Lista de dicionários com {icon, label, value, unit, trend, help}
+        help_text (str): Texto de ajuda opcional no rodapé
 
     Returns:
-        str: HTML completo do card
+        str: HTML completo do card com CSS inline
     """
-    # CSS inline atualizado
+    # CSS modernizado com variáveis e animações
     css = """
     <style>
-    .energy-card {
-        border-radius: 10px;
-        padding: 15px;
-        margin: 15px 0;
-        background: linear-gradient(135deg, #0F2027 0%, #203A43 100%);
-        color: white;
-        font-family: Arial;
-        border-left: 5px solid #4CAF50;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    :root {
+        --primary-color: #00C853;
+        --secondary-color: #5E35B1;
+        --background-dark: #121212;
+        --text-primary: #FFFFFF;
+        --text-secondary: #B0B0B0;
+        --card-border: 1px solid rgba(255, 255, 255, 0.1);
     }
+
+    .energy-card {
+        border-radius: 12px;
+        padding: 20px;
+        margin: 15px 0;
+        background: var(--background-dark);
+        color: var(--text-primary);
+        font-family: 'Segoe UI', system-ui;
+        border: var(--card-border);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .energy-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(0, 200, 83, 0.2);
+    }
+
+    .energy-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+    }
+
+    .card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--primary-color);
+    }
+
     .card-row {
         display: flex;
         align-items: center;
-        margin: 10px 0;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #333;
+        margin: 12px 0;
+        padding: 8px 0;
+        transition: all 0.2s ease;
     }
-    .card-row:last-child {
-        border-bottom: none !important;
+
+    .card-row:hover {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 6px;
     }
-    .card-title {
-        text-align: center;
-        color: #4CAF50;
-        margin-bottom: 15px;
-        font-size: 1.2em;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #333;  /* Adiciona o divider */
-        position: relative;
+
+    .card-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 12px;
+        flex-shrink: 0;
+    }
+
+    .card-label {
+        flex: 1;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .card-value {
+        font-weight: 700;
+        margin-right: 6px;
+        color: var(--primary-color);
+        font-size: 1.05rem;
+    }
+
+    .card-unit {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        min-width: 60px;
+        text-align: right;
+    }
+
+    .card-trend {
+        margin-left: 8px;
+        font-size: 0.8rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .trend-up {
+        background: rgba(0, 200, 83, 0.15);
+        color: var(--primary-color);
+    }
+
+    .trend-down {
+        background: rgba(255, 82, 82, 0.15);
+        color: #FF5252;
+    }
+
+    .card-footer {
+        margin-top: 5px;
+        padding-top: 5px;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
     </style>
     """
 
-    # Gera o conteúdo das linhas (mantido igual)
+    # Gera o conteúdo das linhas com suporte a trend indicators
     rows_html = ""
     for row in rows:
+        trend_html = ""
+        if "trend" in row:
+            trend_class = "trend-up" if row["trend"] >= 0 else "trend-down"
+            trend_icon = "↑" if row["trend"] >= 0 else "↓"
+            trend_html = f"""<span class="card-trend {trend_class}">
+                              {trend_icon} {abs(row['trend'])}%
+                            </span>"""
+
+        help_html = (
+            f"""<span class="card-help" title="{row.get('help', '')}">ⓘ</span>"""
+            if "help" in row
+            else ""
+        )
+
         rows_html += f"""
         <div class="card-row">
-            <img src="data:image/svg+xml;base64,{row['icon']}"
-                 style="width: 20px; height: 20px; margin-right: 10px;">
-            <span style="flex: 1; color: #E0E0E0;"><strong>{row['label']}</strong></span>
-            <span style="font-weight: bold; color: #4CAF50; margin-right: 5px;">{row['value']}</span>
-            <span style="color: #B0B0B0; font-size: 0.9em;">{row['unit']}</span>
+            <img src="data:image/svg+xml;base64,{row['icon']}" class="card-icon">
+            <span class="card-label">{row['label']}{help_html}</span>
+            <span class="card-value">{row['value']}</span>
+            <span class="card-unit">{row['unit']}</span>
+            {trend_html}
         </div>
         """
 
-    # HTML completo (mantido igual)
+    # HTML completo com footer opcional
+    footer_html = (
+        f"""
+    <div style="
+        margin-top: 15px;
+        padding-top: 10px;
+        font-size: 0.8rem;
+        color: #888;
+        border-top: 1px solid #333;
+    ">
+        {footer}
+    </div>
+    """
+        if footer
+        else ""
+    )
+
     card_content = f"""
     <div class="energy-card">
         <div class="card-title">{title}</div>
         {rows_html}
+        {footer_html}
     </div>
     """
 

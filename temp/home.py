@@ -75,6 +75,7 @@ class HomeView:
             """)
 
 
+# --- Funções auxiliares ---
 def card_total_performance_indicators(df: pd.DataFrame) -> None:
     """Exibe indicadores de desempenho da usina com cálculo otimizado e padrões consistentes."""
 
@@ -173,7 +174,6 @@ def card_environmental_benefits(df: pd.DataFrame) -> None:
     components.html(create_card("Benefícios Ambientais", rows_data), height=200)
 
 
-# --- Funções auxiliares ---
 def _validate_dataframe(df: pd.DataFrame) -> None:
     """Valida a estrutura do DataFrame."""
     required = {"Energy", "Year", "Month"}
