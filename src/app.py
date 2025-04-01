@@ -102,20 +102,20 @@ def main():
         return
 
     # Barra de status
-    if "df" in st.session_state:
-        status_cols = st.columns(3)
-        with status_cols[0]:
-            st.metric("Registros", len(st.session_state.df))
-        with status_cols[1]:
-            st.metric(
-                "Período",
-                f"{st.session_state.df['Date'].min().date()} a {st.session_state.df['Date'].max().date()}",
-            )
-        with status_cols[2]:
-            st.metric(
-                "Energia Total", f"{st.session_state.df['Energy'].sum():,.1f} kWh"
-            )
-        st.divider()
+    # if "df" in st.session_state:
+    #     status_cols = st.columns(3)
+    #     with status_cols[0]:
+    #         st.metric("Registros", len(st.session_state.df))
+    #     with status_cols[1]:
+    #         st.metric(
+    #             "Período",
+    #             f"{st.session_state.df['Date'].min().date()} a {st.session_state.df['Date'].max().date()}",
+    #         )
+    #     with status_cols[2]:
+    #         st.metric(
+    #             "Energia Total", f"{st.session_state.df['Energy'].sum():,.1f} kWh"
+    #         )
+    #     st.divider()
 
     # Container principal
     main_container = st.container()

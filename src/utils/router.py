@@ -14,7 +14,7 @@ class Router:
             self._load_error_page()
 
     def _load_home(self, data):
-        from views.home_view import HomeView
+        from modules.home.home_view import HomeView
 
         view = HomeView()
         view.display(data)
