@@ -208,7 +208,7 @@ def plot_microinverter_year_barchart(data):
             xref="paper",
             yref="paper",
             x=0.5,
-            y=-0.35,
+            y=-0.30,
             showarrow=False,
             font={"size": 10, "color": "gray"},
         )

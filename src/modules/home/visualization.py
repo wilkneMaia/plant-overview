@@ -30,7 +30,7 @@ def apply_bar_chart_defaults(fig, xlabel: str, ylabel: str) -> None:
 
 
 def apply_grouped_barchart_defaults(
-    fig, xlabel: str, ylabel: str, height: int = 650
+    fig, xlabel: str, ylabel: str, height: int = 500
 ) -> None:
     """
     Aplica padrões visuais para gráficos de barras agrupadas.
@@ -42,19 +42,26 @@ def apply_grouped_barchart_defaults(
         height: Altura do gráfico
     """
     fig.update_layout(
-        xaxis={
-            "type": "category",
-            "title": {"text": f"<b>{xlabel}</b>", "font": {"size": 14}},
-            "tickangle": -45,
-        },
-        yaxis={"title": {"text": f"<b>{ylabel}</b>", "font": {"size": 14}}},
+        # Configurações de eixo
+        xaxis=dict(
+            title={"text": f"<b>{xlabel}</b>", "font": {"size": 14}},
+            tickangle=0,
+            type="category",
+        ),
+        yaxis=dict(
+            title={"text": f"<b>{ylabel}</b>", "font": {"size": 14}},
+        ),
+        # Legenda (condicional)
+        legend=dict(
+            title={"text": "<b>Microinversores Ativos</b>"},
+            orientation="h",
+            y=-0.18,
+            # x=0.5,
+            # xanchor="center",
+        ),
+        # Configurações de layout
         height=height,
         plot_bgcolor="rgba(0,0,0,0)",
-        legend={
-            "orientation": "h",
-            "y": -0.25,
-            "title": {"text": "<b>Microinversores Ativos</b>"},
-        },
         margin={"t": 100, "b": 100},
         bargap=0.3,
         bargroupgap=0.1,
@@ -298,9 +305,9 @@ def apply_line_chart_defaults(
                 title_text="<b>ANO</b>",
                 orientation="h",
                 yanchor="bottom",
-                y=-0.4,
-                xanchor="center",
-                x=0.5,
+                y=-0.3,
+                # xanchor="left",
+                # x=0.5,
                 font=dict(size=12),
                 bgcolor="rgba(0,0,0,0.3)",
                 bordercolor="#cccccc",
