@@ -1,7 +1,6 @@
 
 import pandas as pd
 import plotly.express as px
-import streamlit as st
 from plotly import graph_objects as go
 
 
@@ -29,43 +28,6 @@ def apply_bar_chart_defaults(fig, xlabel: str, ylabel: str) -> None:
         paper_bgcolor="#181818",
         hovermode="x unified",
     )
-
-
-def create_custom_bar_chart(
-    data: pd.DataFrame, x_col: str, y_col: str, title: str, color: str, **kwargs
-):
-    """
-    Cria gráfico de barras com estilo consistente.
-
-    Args:
-        data: DataFrame com dados
-        x_col: Nome da coluna para eixo X
-        y_col: Nome da coluna para eixo Y
-        title: Título do gráfico
-        color: Cor ou lista de cores
-
-    Returns:
-        Figura Plotly configurada
-    """
-    fig = px.bar(
-        data,
-        x=x_col,
-        y=y_col,
-        title=title,
-        color_discrete_sequence=[color] if isinstance(color, str) else color,
-        text_auto=".2s" if kwargs.get("show_values", True) else False,
-    )
-
-    apply_bar_chart_defaults(fig, x_col, y_col)
-
-    fig.update_traces(
-        marker_line_width=1,
-        marker_line_color="white",
-        opacity=0.9,
-        textposition="outside",
-    )
-
-    return fig
 
 
 def apply_grouped_barchart_defaults(
@@ -471,15 +433,93 @@ def configure_heatmap_layout(
     )
 
 
-def handle_heatmap_error(error: Exception, data: pd.DataFrame | None = None) -> None:
+def apply_production_bar_style(
+    fig: go.Figure,
+    data: pd.DataFrame,
+    unit: str = "kWh",
+    margin: dict | None = None,
+    xaxis_title: str = "Ano",  # Novo parâmetro para customização
+) -> None:
     """
-    Trata erros na geração do heatmap.
+    Aplica estilo avançado ao gráfico de produção.
 
     Args:
-        error: Exceção capturada
-        data: DataFrame original para debug (opcional)
+        fig: Figura Plotly
+        data: DataFrame usado no gráfico
+        unit: Unidade de medida
+        margin: Dicionário com margens personalizadas
+        xaxis_title: Título personalizado para o eixo X (padrão: "Ano")
     """
-    st.error(f"Erro ao criar heatmap: {error!s}")
-    if data is not None and not data.empty:
-        st.warning("Dados recebidos (amostra):")
-        st.dataframe(data.head(3))
+    margin = margin or dict(l=60, r=30, t=90, b=60)
+
+    fig.update_traces(
+        marker=dict(line=dict(width=1.5, color="rgba(255,255,255,0.7)"), opacity=0.85),
+        hovertemplate=(
+            f"<b>{xaxis_title} %{{x}}:</b><br>"  # Atualizado para usar o título personalizado
+            f"Produção: %{{y:,.0f}} {unit}<br>"
+            "<extra></extra>"
+        ),
+        texttemplate="%{y:,.0f}",
+        textposition="outside",
+        textfont=dict(color="white", size=11),
+    )
+
+    fig.update_layout(
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        margin=margin,
+        showlegend=False,
+        coloraxis_showscale=False,
+        xaxis=dict(
+            title=xaxis_title,
+            tickmode="array",
+            tickvals=data["Year"],
+            gridcolor="rgba(100,100,100,0.1)",
+            title_font=dict(size=14),
+            tickangle= -45,
+        ),
+        yaxis=dict(
+            title=f"Produção ({unit})",
+            gridcolor="rgba(100,100,100,0.1)",
+            zerolinecolor="rgba(100,100,100,0.3)",
+            title_font=dict(size=14),
+        ),
+        hoverlabel=dict(bgcolor="rgba(30,30,30,0.8)", font_size=12),
+    )
+
+
+def create_production_bar_chart(
+    data: pd.DataFrame,
+    x_col: str,
+    y_col: str,
+    title: str,
+    color_scale: list,
+    unit: str = "kWh",
+    height: int = 500,
+) -> go.Figure:
+    """
+    Cria gráfico de barras de produção energética padronizado.
+
+    Args:
+        data: DataFrame com dados
+        x_col: Coluna para eixo X (ex: 'Year')
+        y_col: Coluna para eixo Y (ex: 'Energy')
+        title: Título principal
+        color_scale: Escala de cores gradiente
+        unit: Unidade de medida
+        height: Altura do gráfico
+
+    Returns:
+        Figura Plotly configurada
+    """
+    return px.bar(
+        data,
+        x=x_col,
+        y=y_col,
+        title=title,
+        color=y_col,
+        color_continuous_scale=color_scale,
+        text_auto=True,
+        labels={y_col: f"Produção ({unit})", x_col: x_col.replace("_", " ")},
+        height=height,
+    )

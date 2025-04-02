@@ -406,3 +406,17 @@ def handle_plot_error(error: Exception, raw_data: pd.DataFrame = None) -> None:
     if raw_data is not None and not raw_data.empty:
         st.warning("Visualização parcial dos dados recebidos:")
         st.dataframe(raw_data.head(3))
+
+
+def handle_heatmap_error(error: Exception, data: pd.DataFrame | None = None) -> None:
+    """
+    Trata erros na geração do heatmap.
+
+    Args:
+        error: Exceção capturada
+        data: DataFrame original para debug (opcional)
+    """
+    st.error(f"Erro ao criar heatmap: {error!s}")
+    if data is not None and not data.empty:
+        st.warning("Dados recebidos (amostra):")
+        st.dataframe(data.head(3))

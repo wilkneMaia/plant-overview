@@ -4,6 +4,7 @@ import streamlit as st
 from config.constants import Colors
 
 from .metrics import (
+    aggregate_energy_by_year,
     aggregate_energy_by_year_microinverter,
     calculate_heatmap_height,
     calculate_yearly_averages,
@@ -11,10 +12,10 @@ from .metrics import (
     detect_significant_trends,
     filter_positive_energy,
     get_month_names,
+    handle_heatmap_error,
     handle_plot_error,
     prepare_data_for_heatmap,
     prepare_monthly_comparison_data,
-    prepare_year_production_data,
     validate_columns,
 )
 from .visualization import (
@@ -23,13 +24,13 @@ from .visualization import (
     apply_area_chart_defaults,
     apply_grouped_barchart_defaults,
     apply_line_chart_defaults,
+    apply_production_bar_style,
     configure_heatmap_layout,
     create_comparison_area_chart,
     create_comparison_line_chart,
-    create_custom_bar_chart,
     create_grouped_barchart,
+    create_production_bar_chart,
     create_safe_heatmap,
-    handle_heatmap_error,
     process_heatmap_years,
     validate_heatmap_input,
 )
@@ -223,26 +224,44 @@ def plot_microinverter_year_barchart(data):
 
 
 # Gráficos de energia gerada por ano
-def plot_energy_production_by_year(df: pd.DataFrame) -> None:
-    """Exibe o total de energia gerada por ano com cores gradientes"""
-    try:
-        # Obtém dados processados
-        yearly_data, colors = prepare_year_production_data(df)
+def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
+    """
+    Exibe o total de energia gerada por ano com design aprimorado.
 
-        # Cria gráfico com funções do módulo de visualização
-        fig = create_custom_bar_chart(
+    Args:
+        df: DataFrame com dados de produção
+        unit: Unidade de medida (padrão: kWh)
+    """
+    try:
+        # Validação e preparação dos dados (mantido em metrics.py)
+        validate_columns(df, {"Year", "Energy"})
+        yearly_data = aggregate_energy_by_year(df)
+
+        # Criação do gráfico usando funções de visualization.py
+        fig = create_production_bar_chart(
             data=yearly_data,
             x_col="Year",
             y_col="Energy",
-            title="Produção Anual (kWh)",
-            color=colors,
-            show_values=True,
-            margin=dict(l=60, r=30, t=100, b=70),
+            title="<b>Produção Anual de Energia</b><br><sub>Comparativo por ano</sub>",
+            color_scale=Colors.GREEN_SEQUENTIAL,
+            unit=unit,
         )
 
-        # Configurações específicas deste gráfico
-        fig.update_layout(showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
+        # Aplicação do estilo
+        apply_production_bar_style(
+            fig=fig, data=yearly_data, unit="MWh", xaxis_title="Ano"
+        )
+
+        # Exibição otimizada
+        st.plotly_chart(
+            fig,
+            use_container_width=True,
+            config={
+                "displayModeBar": True,
+                "modeBarButtonsToRemove": ["toImage", "lasso2d"],
+                "displaylogo": False,
+            },
+        )
 
     except Exception as e:
-        st.error(f"Erro ao gerar gráfico: {e!s}")
+        handle_plot_error(e, df)
