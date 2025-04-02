@@ -1,5 +1,4 @@
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 
 from config.constants import Colors
@@ -19,16 +18,20 @@ from .metrics import (
     validate_columns,
 )
 from .visualization import (
+    add_average_lines,
+    add_trend_annotations,
     apply_area_chart_defaults,
     apply_grouped_barchart_defaults,
+    apply_line_chart_defaults,
+    configure_heatmap_layout,
     create_comparison_area_chart,
+    create_comparison_line_chart,
     create_custom_bar_chart,
     create_grouped_barchart,
-    add_average_lines,
-    create_comparison_line_chart,
-    apply_line_chart_defaults,
-    add_trend_annotations
-
+    create_safe_heatmap,
+    handle_heatmap_error,
+    process_heatmap_years,
+    validate_heatmap_input,
 )
 
 
@@ -36,44 +39,39 @@ from .visualization import (
 # Gráficos de energia gerada por microinversor
 def plot_energy_heatmap_by_microinverter(data):
     """
-    Cria um heatmap com anos inteiros no eixo X e melhor legibilidade
+    Cria um heatmap com anos inteiros no eixo X e melhor legibilidade.
+    Versão refatorada usando funções externalizadas.
     """
     try:
-
-        # Prepara os dados
+        # Validação e processamento
+        validate_heatmap_input(data)
         df_agg = prepare_data_for_heatmap(data)
+        years = process_heatmap_years(df_agg.columns)
 
-        # Calcula a altura ideal
-        height = calculate_heatmap_height(df_agg)
+        # Cálculo de altura com fallback
+        try:
+            height = calculate_heatmap_height(df_agg)
+        except Exception as e:
+            height = 600
+            st.warning(f"Usando altura padrão: {e}")
 
-        # Heatmap
-        fig = px.imshow(
-            df_agg,
-            labels=dict(x="Ano", y="Microinversor", color="Energia (kWh)"),
-            color_continuous_scale=Colors.GREEN_SEQUENTIAL,
-            aspect="auto",
-            text_auto=".1f",
-        )
-
-        # Formatação do eixo X
-        fig.update_xaxes(
-            tickmode="array",
-            tickvals=df_agg.columns,  # Valores originais
-            ticktext=[str(int(year)) for year in df_agg.columns],  # Labels formatados
-            tickangle=0,
-        )
-
-        # Layout final
-        fig.update_layout(
-            title="Energia por Ano e Microinversor",
-            xaxis_title="Ano",
-            yaxis_title="Microinversor",
+        # Criação e configuração do heatmap
+        fig = create_safe_heatmap(
+            data_values=df_agg.values,
+            years=years,
+            microinverters=df_agg.index.astype(str),
+            color_scale=Colors.GREEN_SEQUENTIAL,
             height=height,
         )
 
+        configure_heatmap_layout(
+            fig=fig, title="Energia por Ano e Microinversor", height=height, years=years
+        )
+
         return fig
+
     except Exception as e:
-        st.error(f"Erro ao criar heatmap: {e!s}")
+        handle_heatmap_error(e, data)
         return None
 
 
@@ -95,7 +93,7 @@ def plot_line_comparison_by_year(df):
             color_col="Year",
             title="Comparativo de Geração por Mês e Ano",
             colors=Colors.GREEN_DISCRETE,
-            month_mapping=month_names
+            month_mapping=month_names,
         )
 
         # Aplicação de configurações padrão
@@ -103,7 +101,7 @@ def plot_line_comparison_by_year(df):
             fig=fig,
             xlabel="Mês",
             ylabel="Energia Gerada (kWh)",
-            month_mapping=month_names
+            month_mapping=month_names,
         )
 
         # Elementos adicionais
@@ -117,7 +115,7 @@ def plot_line_comparison_by_year(df):
                 "y": 0.95,
                 "x": 0.5,
                 "xanchor": "center",
-                "font": {"size": 18, "color": "white"}
+                "font": {"size": 18, "color": "white"},
             }
         )
 
@@ -125,7 +123,6 @@ def plot_line_comparison_by_year(df):
 
     except Exception as e:
         handle_plot_error(e, df)
-
 
 
 # Gráficos de energia gerada por ano

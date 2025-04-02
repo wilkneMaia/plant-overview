@@ -1,6 +1,7 @@
 
 import pandas as pd
 import plotly.express as px
+import streamlit as st
 from plotly import graph_objects as go
 
 
@@ -248,7 +249,7 @@ def create_comparison_line_chart(
     title: str,
     colors: list[str],
     month_mapping: dict[int, str],
-    **kwargs
+    **kwargs,
 ) -> go.Figure:
     """
     Cria gráfico de linhas comparativo padronizado.
@@ -275,14 +276,12 @@ def create_comparison_line_chart(
         color_discrete_sequence=colors,
         template="plotly_dark",
         labels={y_col: "Energia Gerada (kWh)"},
-        **kwargs
+        **kwargs,
     )
 
+
 def apply_line_chart_defaults(
-    fig: go.Figure,
-    xlabel: str,
-    ylabel: str,
-    month_mapping: dict[int, str]
+    fig: go.Figure, xlabel: str, ylabel: str, month_mapping: dict[int, str]
 ) -> None:
     """
     Aplica configurações padrão para gráficos de linhas comparativos.
@@ -299,11 +298,11 @@ def apply_line_chart_defaults(
             "tickvals": list(month_mapping.keys()),
             "ticktext": list(month_mapping.values()),
             "tickangle": -45,
-            "gridcolor": "rgba(80, 80, 80, 0.3)"
+            "gridcolor": "rgba(80, 80, 80, 0.3)",
         },
         yaxis={
             "title": {"text": ylabel, "font": {"size": 14, "color": "white"}},
-            "gridcolor": "rgba(80, 80, 80, 0.3)"
+            "gridcolor": "rgba(80, 80, 80, 0.3)",
         },
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="#181818",
@@ -312,22 +311,20 @@ def apply_line_chart_defaults(
             "title": "Ano",
             "orientation": "h",
             "y": -0.2,
-            "bgcolor": "rgba(0,0,0,0.3)"
+            "bgcolor": "rgba(0,0,0,0.3)",
         },
-        margin=dict(l=50, r=30, t=80, b=50)
+        margin=dict(l=50, r=30, t=80, b=50),
     )
 
     fig.update_traces(
         line=dict(width=2.5),
         marker=dict(size=8),
-        hovertemplate=f"<b>%{{fullData.name}}:</b> %{{y:,.2f}} kWh<br>{xlabel}: %{{x}}<extra></extra>"
+        hovertemplate=f"<b>%{{fullData.name}}:</b> %{{y:,.2f}} kWh<br>{xlabel}: %{{x}}<extra></extra>",
     )
 
+
 def add_average_lines(
-    fig: go.Figure,
-    averages: dict,
-    colors: list[str],
-    x_range: tuple = (1, 12)
+    fig: go.Figure, averages: dict, colors: list[str], x_range: tuple = (1, 12)
 ) -> None:
     """
     Adiciona linhas de média anual ao gráfico.
@@ -345,20 +342,13 @@ def add_average_lines(
             y0=avg,
             x1=x_range[1],
             y1=avg,
-            line=dict(
-                color=colors[i % len(colors)],
-                width=1.5,
-                dash="dash"
-            ),
-            opacity=0.7
+            line=dict(color=colors[i % len(colors)], width=1.5, dash="dash"),
+            opacity=0.7,
         )
 
+
 def add_trend_annotations(
-    fig: go.Figure,
-    trends: dict,
-    data: pd.DataFrame,
-    x_pos: int = 12,
-    x_shift: int = 15
+    fig: go.Figure, trends: dict, data: pd.DataFrame, x_pos: int = 12, x_shift: int = 15
 ) -> None:
     """
     Adiciona anotações de tendência ao gráfico.
@@ -378,64 +368,85 @@ def add_trend_annotations(
             text=f"{'↑' if trend_value > 0 else '↓'} {abs(trend_value):.0f} kWh",
             showarrow=False,
             font=dict(color=color, size=12),
-            xshift=x_shift
+            xshift=x_shift,
         )
 
 
-def create_heatmap(
-    data: pd.DataFrame,
-    title: str,
-    color_scale: list[str],
-    x_label: str = "Ano",
-    y_label: str = "Microinversor",
-    value_label: str = "Energia (kWh)",
-    text_format: str = ".1f",
-    **kwargs
-) -> go.Figure:
+def validate_heatmap_input(data: pd.DataFrame) -> None:
     """
-    Cria um heatmap padronizado com configurações de estilo.
+    Valida os dados de entrada para o heatmap.
 
     Args:
-        data: DataFrame com dados (formato pivotado)
-        title: Título do gráfico
+        data: DataFrame de entrada
+
+    Raises:
+        ValueError: Se os dados forem inválidos
+    """
+    if not isinstance(data, pd.DataFrame) or data.empty:
+        raise ValueError("Dados de entrada inválidos ou DataFrame vazio")
+
+
+def process_heatmap_years(columns: pd.Index) -> list:
+    """
+    Processa e valida os anos do heatmap.
+
+    Args:
+        columns: Índice com os anos
+
+    Returns:
+        Lista de anos convertidos para inteiro
+
+    Raises:
+        ValueError: Se nenhum ano válido for encontrado
+    """
+    years = [int(year) for year in columns if str(year).isdigit()]
+    if not years:
+        raise ValueError("Nenhum ano válido encontrado nos dados")
+    return years
+
+
+def create_safe_heatmap(
+    data_values: list,
+    years: list,
+    microinverters: list,
+    color_scale: list,
+    height: int = 600,
+) -> px.imshow:
+    """
+    Cria um heatmap com tratamento seguro de dados.
+
+    Args:
+        data_values: Valores da matriz do heatmap
+        years: Lista de anos para eixo X
+        microinverters: Lista de microinversores para eixo Y
         color_scale: Escala de cores
-        x_label: Label do eixo X
-        y_label: Label do eixo Y
-        value_label: Label dos valores
-        text_format: Formato dos textos (ex: ".1f")
+        height: Altura do gráfico
 
     Returns:
         Figura Plotly configurada
     """
-    fig = px.imshow(
-        data,
-        labels=dict(x=x_label, y=y_label, color=value_label),
+    return px.imshow(
+        data_values,
+        labels=dict(x="Ano", y="Microinversor", color="Energia (kWh)"),
         color_continuous_scale=color_scale,
         aspect="auto",
-        text_auto=text_format,
-        **kwargs
+        text_auto=".1f",
+        x=years,
+        y=microinverters,
     )
 
-    return fig
 
-def apply_heatmap_defaults(
-    fig: go.Figure,
-    height: int,
-    title: str,
-    x_values: list = None,
-    x_label: str = "Ano",
-    y_label: str = "Microinversor"
+def configure_heatmap_layout(
+    fig: px.imshow, title: str, height: int, years: list
 ) -> None:
     """
-    Aplica configurações padrão para heatmaps.
+    Aplica configurações de layout ao heatmap.
 
     Args:
         fig: Figura Plotly
-        height: Altura do gráfico
         title: Título do gráfico
-        x_values: Valores para o eixo X
-        x_label: Label do eixo X
-        y_label: Label do eixo Y
+        height: Altura do gráfico
+        years: Lista de anos para formatação
     """
     fig.update_layout(
         title={
@@ -443,27 +454,32 @@ def apply_heatmap_defaults(
             "y": 0.95,
             "x": 0.5,
             "xanchor": "center",
-            "font": {"size": 18, "color": "white"}
+            "font": {"size": 18},
         },
-        xaxis_title=x_label,
-        yaxis_title=y_label,
+        xaxis_title="Ano",
+        yaxis_title="Microinversor",
         height=height,
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="#181818",
-        margin=dict(l=100, r=30, t=100, b=50)
+        margin=dict(l=100, r=30, t=100, b=50),
     )
 
-    if x_values:
-        fig.update_xaxes(
-            tickmode="array",
-            tickvals=list(range(len(x_values))),
-            ticktext=[str(int(year)) for year in x_values],
-            tickangle=0
-        )
-
-    fig.update_coloraxes(
-        colorbar={
-            "title": {"text": "kWh", "font": {"color": "white"}},
-            "tickfont": {"color": "white"}
-        }
+    fig.update_xaxes(
+        tickvals=list(range(len(years))),
+        ticktext=[str(year) for year in years],
+        tickangle=0,
     )
+
+
+def handle_heatmap_error(error: Exception, data: pd.DataFrame | None = None) -> None:
+    """
+    Trata erros na geração do heatmap.
+
+    Args:
+        error: Exceção capturada
+        data: DataFrame original para debug (opcional)
+    """
+    st.error(f"Erro ao criar heatmap: {error!s}")
+    if data is not None and not data.empty:
+        st.warning("Dados recebidos (amostra):")
+        st.dataframe(data.head(3))
