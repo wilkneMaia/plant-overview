@@ -1,6 +1,9 @@
 import logging
 
 import pandas as pd
+import streamlit as st
+
+from config.constants import Colors
 
 logging.basicConfig(level=logging.INFO)
 
@@ -245,28 +248,161 @@ def calculate_color_mapping(
     return [colorscale[i] for i in color_indices]
 
 
-def filter_positive_energy(data: pd.DataFrame) -> pd.DataFrame:
+def clean_year_column(data: pd.DataFrame) -> pd.DataFrame:
     """
-    Filtra dados com valores de energia positiva.
+    Converte a coluna 'Year' para inteiro extraindo apenas dígitos.
 
     Args:
-        data (pd.DataFrame): DataFrame com a coluna 'Energy'.
+        data: DataFrame contendo coluna 'Year'
 
     Returns:
-        pd.DataFrame: DataFrame filtrado.
+        DataFrame com coluna 'Year' convertida para inteiro
     """
-    return data[data["Energy"] > 0]
+    df = data.copy()
+    df["Year"] = df["Year"].astype(str).str.extract(r"(\d+)")[0].astype(int)
+    return df
 
 
-def aggregate_energy_by_year_and_microinverter(data: pd.DataFrame) -> pd.DataFrame:
+def filter_positive_energy(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Filtra apenas registros com energia positiva.
+
+    Args:
+        data: DataFrame contendo coluna 'Energy'
+
+    Raises:
+        ValueError: Se DataFrame filtrado for vazio
+
+    Returns:
+        DataFrame filtrado
+    """
+    df = data[data["Energy"] > 0].copy()
+    if df.empty:
+        raise ValueError("Nenhum dado positivo encontrado")
+    return df
+
+
+def aggregate_energy_by_year_microinverter(data: pd.DataFrame) -> pd.DataFrame:
     """
     Agrega energia por ano e microinversor.
 
     Args:
-        data (pd.DataFrame): DataFrame contendo 'Year', 'Microinversor', 'Energy'.
+        data: DataFrame com colunas 'Year', 'Microinversor', 'Energy'
 
     Returns:
-        pd.DataFrame: DataFrame agregado por 'Year' e 'Microinversor'.
+        DataFrame agregado e ordenado
     """
-    validate_columns(data, {"Year", "Microinversor", "Energy"})
-    return data.groupby(["Year", "Microinversor"], as_index=False)["Energy"].sum()
+    return (
+        data.groupby(["Year", "Microinversor"], as_index=False)["Energy"]
+        .sum()
+        .sort_values(["Year", "Microinversor"])
+    )
+
+
+def prepare_monthly_comparison_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Prepara dados para comparação mensal de energia por ano.
+
+    Args:
+        df: DataFrame contendo colunas 'Year', 'Month' e 'Energy'
+
+    Returns:
+        DataFrame agregado por ano e mês
+
+    Raises:
+        ValueError: Se colunas necessárias não existirem
+    """
+    validate_columns(df, {"Year", "Month", "Energy"})
+
+    return df.groupby(["Year", "Month"])["Energy"].sum().reset_index()
+
+
+def get_month_names() -> dict:
+    """
+    Retorna mapeamento de números para nomes abreviados dos meses.
+
+    Returns:
+        Dicionário com {número: nome_abreviado}
+    """
+    return {
+        1: "Jan",
+        2: "Fev",
+        3: "Mar",
+        4: "Abr",
+        5: "Mai",
+        6: "Jun",
+        7: "Jul",
+        8: "Ago",
+        9: "Set",
+        10: "Out",
+        11: "Nov",
+        12: "Dez",
+    }
+
+
+def calculate_yearly_averages(monthly_data: pd.DataFrame) -> dict:
+    """
+    Calcula médias anuais para adicionar como linhas de referência.
+
+    Args:
+        monthly_data: DataFrame com colunas 'Year' e 'Energy'
+
+    Returns:
+        Dicionário com {ano: média_energia}
+    """
+    return monthly_data.groupby("Year")["Energy"].mean().to_dict()
+
+
+def detect_significant_trends(monthly_data: pd.DataFrame, threshold=0.2) -> dict:
+    """
+    Identifica tendências anuais significativas.
+
+    Args:
+        monthly_data: DataFrame com colunas 'Year' e 'Energy'
+        threshold: Limite percentual para considerar significativo
+
+    Returns:
+        Dicionário com {ano: (valor_tendência, cor)}
+    """
+    trends = {}
+    for year in monthly_data["Year"].unique():
+        year_data = monthly_data[monthly_data["Year"] == year]
+        trend_value = year_data["Energy"].iloc[-1] - year_data["Energy"].iloc[0]
+        if abs(trend_value) > (year_data["Energy"].max() * threshold):
+            trends[year] = (trend_value, "green" if trend_value > 0 else "red")
+    return trends
+
+
+def prepare_year_production_data(df: pd.DataFrame) -> tuple[pd.DataFrame, list]:
+    """
+    Prepara dados para gráfico de produção anual com cores gradientes.
+
+    Args:
+        df: DataFrame com colunas 'Year' e 'Energy'
+
+    Returns:
+        Tuple: (dados_agregados, lista_cores)
+
+    Raises:
+        ValueError: Se colunas necessárias não existirem
+    """
+    validate_columns(df, {"Year", "Energy"})
+
+    df_agg = aggregate_energy_by_year(df)
+    colors = calculate_color_mapping(df_agg, "Energy", Colors.GREEN_SEQUENTIAL)
+
+    return df_agg, colors
+
+
+def handle_plot_error(error: Exception, raw_data: pd.DataFrame = None) -> None:
+    """
+    Tratamento padronizado para erros em gráficos.
+
+    Args:
+        error: Exceção capturada
+        raw_data: Dados originais para debug
+    """
+    st.error(f"Erro na geração do gráfico: {error!s}")
+    if raw_data is not None and not raw_data.empty:
+        st.warning("Visualização parcial dos dados recebidos:")
+        st.dataframe(raw_data.head(3))

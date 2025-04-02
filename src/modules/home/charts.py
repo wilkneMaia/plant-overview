@@ -3,7 +3,34 @@ import plotly.express as px
 import streamlit as st
 
 from config.constants import Colors
-from .metrics import prepare_data_for_heatmap, calculate_heatmap_height, validate_energy_year_data, aggregate_energy_by_year, calculate_color_mapping
+
+from .metrics import (
+    aggregate_energy_by_year_microinverter,
+    calculate_heatmap_height,
+    calculate_yearly_averages,
+    clean_year_column,
+    detect_significant_trends,
+    filter_positive_energy,
+    get_month_names,
+    handle_plot_error,
+    prepare_data_for_heatmap,
+    prepare_monthly_comparison_data,
+    prepare_year_production_data,
+    validate_columns,
+)
+from .visualization import (
+    apply_area_chart_defaults,
+    apply_grouped_barchart_defaults,
+    create_comparison_area_chart,
+    create_custom_bar_chart,
+    create_grouped_barchart,
+    add_average_lines,
+    create_comparison_line_chart,
+    apply_line_chart_defaults,
+    add_trend_annotations
+
+)
+
 
 # --- Gráficos ---
 # Gráficos de energia gerada por microinversor
@@ -50,298 +77,137 @@ def plot_energy_heatmap_by_microinverter(data):
         return None
 
 
+# Grafico de linhas comparativo
 def plot_line_comparison_by_year(df):
-    """Exibe um gráfico de linhas comparativo com marcadores para análise mensal por ano"""
+    """Exibe gráfico de linhas comparativo com análises de tendência"""
     try:
-        # Prepara os dados
-        monthly_comparison = df.groupby(["Year", "Month"])["Energy"].sum().reset_index()
+        # Processamento de dados
+        monthly_comparison = prepare_monthly_comparison_data(df)
+        month_names = get_month_names()
+        yearly_averages = calculate_yearly_averages(monthly_comparison)
+        significant_trends = detect_significant_trends(monthly_comparison)
 
-        # Cria o gráfico
-        fig = px.line(
-            monthly_comparison,
-            x="Month",
-            y="Energy",
-            color="Year",
-            markers=True,
+        # Criação do gráfico base
+        fig = create_comparison_line_chart(
+            data=monthly_comparison,
+            x_col="Month",
+            y_col="Energy",
+            color_col="Year",
             title="Comparativo de Geração por Mês e Ano",
-            labels={"Month": "Mês", "Energy": "Energia Gerada (kWh)", "Year": "Ano"},
-            template="plotly_dark",
-            color_discrete_sequence=Colors.GREEN_DISCRETE,  # Alterado para nossa paleta de verdes
+            colors=Colors.GREEN_DISCRETE,
+            month_mapping=month_names
         )
 
-        # Customiza aparência
-        fig.update_traces(
-            line=dict(width=2.5),
-            marker=dict(size=8),
-            hovertemplate="<b>%{fullData.name}:</b> %{y:,.2f} kWh<br>Mês: %{x}<extra></extra>",
+        # Aplicação de configurações padrão
+        apply_line_chart_defaults(
+            fig=fig,
+            xlabel="Mês",
+            ylabel="Energia Gerada (kWh)",
+            month_mapping=month_names
         )
 
-        # Adiciona linha de média anual para referência
-        for i, year in enumerate(monthly_comparison["Year"].unique()):
-            year_data = monthly_comparison[monthly_comparison["Year"] == year]
-            year_avg = year_data["Energy"].mean()
+        # Elementos adicionais
+        add_average_lines(fig, yearly_averages, Colors.GREEN_DISCRETE)
+        add_trend_annotations(fig, significant_trends, monthly_comparison)
 
-            fig.add_shape(
-                type="line",
-                x0=1,
-                y0=year_avg,
-                x1=12,
-                y1=year_avg,
-                line=dict(
-                    color=Colors.GREEN_DISCRETE[
-                        i % len(Colors.GREEN_DISCRETE)
-                    ],  # Usa nossa paleta de verdes
-                    width=1.5,
-                    dash="dash",
-                ),
-                opacity=0.7,
-                name=f"Média {year}",
-            )
+        # Personalizações específicas
+        fig.update_layout(
+            title={
+                "text": "Comparativo de Geração por Mês e Ano",
+                "y": 0.95,
+                "x": 0.5,
+                "xanchor": "center",
+                "font": {"size": 18, "color": "white"}
+            }
+        )
 
-        # Layout aprimorado
+        st.plotly_chart(fig, use_container_width=True)
+
+    except Exception as e:
+        handle_plot_error(e, df)
+
+
+
+# Gráficos de energia gerada por ano
+def plot_energy_trend_by_year(df):
+    """Exibe um gráfico de área comparativo dos meses por ano"""
+    try:
+        # Processamento de dados
+        monthly_comparison = prepare_monthly_comparison_data(df)
+        month_names = get_month_names()
+
+        # Criação do gráfico
+        fig = create_comparison_area_chart(
+            data=monthly_comparison,
+            x_col="Month",
+            y_col="Energy",
+            color_col="Year",
+            title="Comparativo de Energia por Mês e Ano",
+            colors=Colors.GREEN_DISCRETE,
+            month_mapping=month_names,
+            labels={"Energy": "Energia Gerada (kWh)"},
+        )
+
+        # Aplicação de configurações
+        apply_area_chart_defaults(
+            fig=fig,
+            xlabel="Mês",
+            ylabel="Energia Gerada (kWh)",
+            month_mapping=month_names,
+        )
+
+        # Personalizações específicas
         fig.update_layout(
             title={
                 "text": "Comparativo de Energia por Mês e Ano",
                 "y": 0.95,
                 "x": 0.5,
                 "xanchor": "center",
-                "font": {"size": 18, "color": "white", "family": "Arial, sans-serif"},
-            },
-            xaxis={
-                "title": {"text": "Mês", "font": {"size": 14, "color": "white"}},
-                "tickvals": list(range(1, 13)),
-                "ticktext": [
-                    "Jan",
-                    "Fev",
-                    "Mar",
-                    "Abr",
-                    "Mai",
-                    "Jun",
-                    "Jul",
-                    "Ago",
-                    "Set",
-                    "Out",
-                    "Nov",
-                    "Dez",
-                ],
-                "tickangle": 0,
-                "gridcolor": "rgba(80, 80, 80, 0.3)",
-                "tickangle": -45,
-            },
-            yaxis={
-                "title": {
-                    "text": "Energia Gerada (kWh)",
-                    "font": {"size": 14, "color": "white"},
-                },
-                "gridcolor": "rgba(80, 80, 80, 0.3)",
-                "zeroline": True,
-                "zerolinecolor": "rgba(255, 255, 255, 0.2)",
-            },
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="#181818",
-            hovermode="x unified",
-            legend={
-                "title": "Ano",
-                "orientation": "h",
-                "y": -0.2,
-                "bgcolor": "rgba(0,0,0,0.3)",
-                "bordercolor": "rgba(255,255,255,0.2)",
-                "borderwidth": 1,
-            },
-            margin=dict(l=50, r=30, t=80, b=50),
-        )
-
-        # Adiciona anotações de tendência (opcional)
-        for year in monthly_comparison["Year"].unique():
-            year_data = monthly_comparison[monthly_comparison["Year"] == year]
-            year_trend = year_data["Energy"].iloc[-1] - year_data["Energy"].iloc[0]
-            if abs(year_trend) > (
-                year_data["Energy"].max() * 0.2
-            ):  # Se a tendência for significativa
-                trend_color = "green" if year_trend > 0 else "red"
-                fig.add_annotation(
-                    x=12,
-                    y=year_data["Energy"].iloc[-1],
-                    text=f"{'↑' if year_trend > 0 else '↓'} {abs(year_trend):.0f} kWh",
-                    showarrow=False,
-                    font=dict(color=trend_color, size=12),
-                    xshift=15,
-                )
-
-        st.plotly_chart(fig, use_container_width=True)
-    except Exception as e:
-        st.error(f"Erro ao gerar gráfico: {e!s}")
-
-
-def plot_energy_trend_by_year(df):
-    """Exibe um gráfico de área comparativo dos meses por ano (não empilhado)"""
-    try:
-        # Prepara os dados
-        monthly_comparison = df.groupby(["Year", "Month"])["Energy"].sum().reset_index()
-        # Cria o gráfico base
-        fig = px.area(
-            monthly_comparison,
-            x="Month",
-            y="Energy",
-            color="Year",
-            title="Comparativo de Energia por Mês e Ano",
-            labels={"Month": "Mês", "Energy": "Energia Gerada (kWh)", "Year": "Ano"},
-            template="plotly_dark",
-            color_discrete_sequence=Colors.GREEN_DISCRETE,  # Alterado para nossa paleta de verdes
-        )
-        # Aplica as customizações
-        fig.update_traces(
-            opacity=0.5,  # Transparência aqui
-            line=dict(width=1),
-            hovertemplate="<b>Ano %{color}:</b> %{y:,.2f} kWh<br>Mês: %{x}<extra></extra>",
-        )
-        # Layout aprimorado
-        fig.update_layout(
-            title={
-                "text": "Comparativo de Energia por Mês e Ano",
-                "y": 0.95,
-                "x": 0.5,
-                "xanchor": "center",  # Adicione esta linha para centralizar o título
                 "font": {"size": 18, "color": "white"},
-            },
-            xaxis={
-                "title": {"text": "Mês", "font": {"size": 14, "color": "white"}},
-                "tickvals": list(range(1, 13)),
-                "ticktext": [
-                    "Jan",
-                    "Fev",
-                    "Mar",
-                    "Abr",
-                    "Mai",
-                    "Jun",
-                    "Jul",
-                    "Ago",
-                    "Set",
-                    "Out",
-                    "Nov",
-                    "Dez",
-                ],
-                "tickangle": 0,
-                "tickangle": -45,
-            },
-            yaxis={
-                "title": {
-                    "text": "Energia Gerada (kWh)",
-                    "font": {"size": 14, "color": "white"},
-                },
-                "gridcolor": "#404040",
-            },
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="#181818",
-            hovermode="x unified",
-            legend={
-                "title": "Ano",
-                "orientation": "h",
-                "y": -0.2,
-                "bgcolor": "rgba(0,0,0,0.5)",
-            },
-            margin=dict(l=50, r=30, t=80, b=50),
+            }
         )
+
         st.plotly_chart(fig, use_container_width=True)
+
     except Exception as e:
-        st.error(f"Erro ao gerar gráfico: {e!s}")
+        handle_plot_error(e, df)
 
 
+# Gráfico de barras agrupadas
 def plot_microinverter_year_barchart(data):
     """
-    Gráfico de barras agrupadas que:
-    - Remove automaticamente barras com valor zero
-    - Mantém a legenda apenas para microinversores com dados
-    - Ordenação cronológica inteligente
+    Gráfico de barras agrupadas com:
+    - Filtro automático de valores zero
+    - Legenda dinâmica
+    - Ordenação cronológica
     - Tooltips detalhados
     """
     try:
-        # 1. VALIDAÇÃO INICIAL
-        required_cols = {"Microinversor", "Year", "Energy"}
-        if not required_cols.issubset(data.columns):
-            missing = required_cols - set(data.columns)
-            raise ValueError(f"Colunas faltando: {missing}")
+        # Validação e pré-processamento
+        validate_columns(data, {"Microinversor", "Year", "Energy"})
+        df = clean_year_column(data)
+        df = filter_positive_energy(df)
+        df_agg = aggregate_energy_by_year_microinverter(df)
 
-        if data.empty:
-            raise ValueError("DataFrame vazio")
+        # Adiciona customdata para tooltips
+        df_agg["Microinversor"] = df_agg["Microinversor"].astype(str)
+        custom_data = df_agg[["Microinversor"]]
 
-        # 2. PRÉ-PROCESSAMENTO
-        df = data.copy()
-        # Limpeza de anos e conversão para inteiro
-        df["Year"] = df["Year"].astype(str).str.extract(r"(\d+)")[0].astype(int)
-
-        # Filtro crítico: remove registros com Energy <= 0
-        df = df[df["Energy"] > 0].copy()
-
-        if df.empty:
-            raise ValueError("Nenhum dado positivo encontrado")
-
-        # 3. AGREGAÇÃO E ORDENAÇÃO
-        df_agg = (
-            df.groupby(["Year", "Microinversor"], as_index=False)["Energy"]
-            .sum()
-            .sort_values(["Year", "Microinversor"])
-        )
-
-        # 4. CRIAÇÃO DO GRÁFICO
-        fig = px.bar(
-            df_agg,
-            x="Year",
-            y="Energy",
-            color="Microinversor",
-            barmode="group",
+        # Construção do gráfico
+        fig = create_grouped_barchart(
+            data=df_agg,
+            x_col="Year",
+            y_col="Energy",
+            color_col="Microinversor",
             title="<b>Distribuição de Energia por Ano</b><br><sup>Microinversores com produção > 0</sup>",
-            color_discrete_sequence=Colors.GREEN_DISCRETE,
-            text_auto=".2s",
-            labels={"Energy": "Energia (kWh)", "Year": "Ano"},
-            category_orders={"Year": sorted(df_agg["Year"].unique())},
+            colors=Colors.GREEN_DISCRETE,
         )
 
-        # 5. CUSTOMIZAÇÃO AVANÇADA
-        fig.update_layout(
-            xaxis={
-                "type": "category",
-                "tickvals": sorted(df_agg["Year"].unique()),
-                "ticktext": [
-                    f"<b>{year}</b>" for year in sorted(df_agg["Year"].unique())
-                ],
-                "title": {"text": "<b>Ano</b>", "font": {"size": 14}},
-            },
-            yaxis={
-                "title": {"text": "<b>Energia (kWh)</b>", "font": {"size": 14}},
-                "gridcolor": "rgba(200,200,200,0.2)",
-            },
-            bargap=0.3,
-            bargroupgap=0.1,
-            hovermode="x unified",
-            height=650,
-            plot_bgcolor="rgba(0,0,0,0)",
-            legend={
-                "title": {
-                    "text": "<b>Microinversores Ativos</b>",
-                    "font": {"size": 12},
-                },
-                "orientation": "h",
-                "y": -0.25,
-            },
-            margin={"t": 100, "b": 100},
-        )
+        # Aplica configurações visuais
+        apply_grouped_barchart_defaults(fig, "Ano", "Energia (kWh)")
+        fig.update_traces(customdata=custom_data)
 
-        fig.update_traces(
-            marker_line_width=1,
-            marker_line_color="white",
-            opacity=0.9,
-            textposition="outside",
-            hovertemplate=(
-                "<b>%{customdata[0]}</b><br>"
-                "Ano: %{x}<br>"
-                "Produção: %{y:,.2f} kWh<br>"
-                "<extra></extra>"
-            ),
-            customdata=df_agg[["Microinversor"]],
-        )
-
-        # 6. ADICIONA ANOTAÇÃO EXPLICATIVA
+        # Adiciona nota explicativa
         fig.add_annotation(
             text="*Barras com valor zero são omitidas automaticamente",
             xref="paper",
@@ -355,135 +221,31 @@ def plot_microinverter_year_barchart(data):
         return fig
 
     except Exception as e:
-        st.error(f"Erro na geração do gráfico: {e!s}")
-        if not data.empty:
-            st.warning("Visualização parcial dos dados recebidos:")
-            st.dataframe(data.head(3))
+        handle_plot_error(e, data)
         return None
-
-
-def create_bar_chart(
-    data,
-    *,
-    x: str,
-    y: str,
-    title: str = "",
-    xlabel: str = None,
-    ylabel: str = None,
-    template: str = "plotly_dark",
-    margin: dict = None,
-    color: str = Colors.PRIMARY_GREEN,
-    show_values: bool = True,
-    **layout_kwargs,
-):
-    """Cria um gráfico de barras altamente customizável com melhorias visuais."""
-    # Valores padrão inteligentes
-    xlabel = xlabel or x
-    ylabel = ylabel or y
-    margin = margin or dict(l=50, r=50, t=80, b=50)
-
-    # Criação do gráfico base
-    fig = px.bar(
-        data,
-        x=x,
-        y=y,
-        title=title,
-        labels={x: xlabel, y: ylabel},
-        template=template,
-        color_discrete_sequence=[color],
-        text_auto=".2s" if show_values else False,
-    )
-
-    # Customização do layout
-    fig.update_layout(
-        title={
-            "text": title,
-            "y": 0.95,
-            "x": 0.5,
-            "xanchor": "center",
-            "font": {"size": 18, "color": "white", "family": "Arial, sans-serif"},
-        },
-        xaxis={
-            "title": {"text": xlabel, "font": {"size": 14, "color": "white"}},
-            "showgrid": False,
-            "tickmode": "linear",
-            "ticks": "outside",
-            "tickwidth": 2,
-            "tickangle": -45,  # Ângulo melhorado
-            "tickfont": {"color": "#ffffff", "size": 12},
-            "automargin": True,  # Previne corte de labels
-        },
-        yaxis={
-            "title": {"text": ylabel, "font": {"size": 14, "color": "white"}},
-            "showgrid": True,
-            "gridcolor": "#404040",
-            "zeroline": True,
-            "zerolinewidth": 1,
-            "zerolinecolor": "gray",
-            "tickfont": {"color": "#ffffff", "size": 12},
-            "automargin": True,
-        },
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="#181818",
-        margin=margin,
-        hovermode="x unified",  # Tooltips unificados
-        hoverlabel={"bgcolor": "#2a2a2a", "font_size": 12, "font_family": "Arial"},
-        uniformtext={"mode": "hide", "minsize": 10} if show_values else {},
-        **layout_kwargs,
-    )
-
-    # Melhorias nas barras
-    fig.update_traces(
-        marker={
-            "line": {"width": 1, "color": "#ffffff"},  # Borda branca nas barras
-            "opacity": 0.9,  # Transparência leve
-        },
-        hovertemplate=(
-            f"<b>{xlabel}:</b> %{{x}}<br>"
-            f"<b>{ylabel}:</b> %{{y:,.2f}}<extra></extra>"
-        ),
-        textposition="outside",  # Posição dos valores
-        textfont={"color": "white", "size": 12},
-    )
-
-    return fig
 
 
 # Gráficos de energia gerada por ano
 def plot_energy_production_by_year(df: pd.DataFrame) -> None:
-    """Exibe o total de energia gerada por ano com cores gradientes de verde."""
+    """Exibe o total de energia gerada por ano com cores gradientes"""
     try:
+        # Obtém dados processados
+        yearly_data, colors = prepare_year_production_data(df)
 
-
-        # Valida os dados
-        if not validate_energy_year_data(df):
-            st.error("Dados incompletos: faltam colunas 'Year' ou 'Energy'")
-            return
-
-        # Agrega os dados por ano
-        total_data = aggregate_energy_by_year(df)
-
-        # Define a escala de cores
-        colorscale = Colors.GREEN_SEQUENTIAL
-
-        # Calcula o mapeamento de cores
-        colors = calculate_color_mapping(total_data, "Energy", colorscale)
-
-        # Cria o gráfico de barras
-        fig = create_bar_chart(
-            data=total_data,
-            x="Year",
-            y="Energy",
+        # Cria gráfico com funções do módulo de visualização
+        fig = create_custom_bar_chart(
+            data=yearly_data,
+            x_col="Year",
+            y_col="Energy",
             title="Produção Anual (kWh)",
             color=colors,
             show_values=True,
             margin=dict(l=60, r=30, t=100, b=70),
         )
 
-        # Remove a legenda de cores (opcional)
+        # Configurações específicas deste gráfico
         fig.update_layout(showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
 
-        # Exibe o gráfico
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
     except Exception as e:
         st.error(f"Erro ao gerar gráfico: {e!s}")
