@@ -176,7 +176,7 @@ def apply_area_chart_defaults(
             "title": {"text": xlabel, "font": {"size": 14, "color": "white"}},
             "tickvals": list(month_mapping.keys()),
             "ticktext": list(month_mapping.values()),
-            "tickangle": -45,
+            "tickangle": 0,
             "gridcolor": "rgba(80, 80, 80, 0.3)",
         },
         yaxis={
@@ -479,7 +479,7 @@ def apply_production_bar_style(
     data: pd.DataFrame,
     unit: str = "kWh",
     margin: dict | None = None,
-    xaxis_title: str = "Ano",  # Novo parâmetro para customização
+    xaxis_title: str = "Ano",
 ) -> None:
     """
     Aplica estilo avançado ao gráfico de produção.
@@ -517,7 +517,7 @@ def apply_production_bar_style(
             tickvals=data["Year"],
             gridcolor="rgba(100,100,100,0.1)",
             title_font=dict(size=14),
-            tickangle=-45,
+            tickangle=0,
         ),
         yaxis=dict(
             title=f"Produção ({unit})",

@@ -151,14 +151,15 @@ def plot_energy_trend_by_year(df):
 
         # Personalizações específicas
         fig.update_layout(
-            title="<b>EVOLUÇÃO ANUAL DA PRODUÇÃO</b><br><sub>Comparativo de Energia por Mês e Ano</sub>",
-            # title={
-            #     "text": "Comparativo de Energia por Mês e Ano",
-            #     "y": 0.95,
-            #     "x": 0.5,
-            #     "xanchor": "center",
-            #     "font": {"size": 18, "color": "white"},
-            # }
+            title={
+                "text": (
+                    "<b>EVOLUÇÃO ANUAL DA PRODUÇÃO</b><br><sub>Comparativo de Energia por Mês e Ano</sub>"
+                ),
+                # "y": 0.95,
+                # "x": 0.5,
+                # "xanchor": "center",
+                "font": {"size": 14, "color": "white"},
+            }
         )
 
         st.plotly_chart(fig, use_container_width=True)
