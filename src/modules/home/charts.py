@@ -3,7 +3,7 @@ import plotly.express as px
 import streamlit as st
 
 from config.constants import Colors
-
+from .metrics import prepare_data_for_heatmap, calculate_heatmap_height, validate_energy_year_data, aggregate_energy_by_year, calculate_color_mapping
 
 # --- Gráficos ---
 # Gráficos de energia gerada por microinversor
@@ -12,17 +12,12 @@ def plot_energy_heatmap_by_microinverter(data):
     Cria um heatmap com anos inteiros no eixo X e melhor legibilidade
     """
     try:
-        # Verificação e pré-processamento
-        required = ["Microinversor", "Year", "Energy"]
-        if not all(col in data.columns for col in required):
-            raise ValueError(f"Colunas necessárias: {required}")
 
-        # Garante que Year seja tratado como inteiro
-        df = data.copy()
-        df["Year"] = pd.to_numeric(df["Year"], errors="coerce").dropna().astype(int)
+        # Prepara os dados
+        df_agg = prepare_data_for_heatmap(data)
 
-        # Agregação
-        df_agg = df.groupby(["Microinversor", "Year"])["Energy"].sum().unstack()
+        # Calcula a altura ideal
+        height = calculate_heatmap_height(df_agg)
 
         # Heatmap
         fig = px.imshow(
@@ -33,7 +28,7 @@ def plot_energy_heatmap_by_microinverter(data):
             text_auto=".1f",
         )
 
-        # Formatação do eixo X (principal mudança)
+        # Formatação do eixo X
         fig.update_xaxes(
             tickmode="array",
             tickvals=df_agg.columns,  # Valores originais
@@ -46,11 +41,10 @@ def plot_energy_heatmap_by_microinverter(data):
             title="Energia por Ano e Microinversor",
             xaxis_title="Ano",
             yaxis_title="Microinversor",
-            height=max(400, len(df_agg) * 25),
+            height=height,
         )
 
         return fig
-
     except Exception as e:
         st.error(f"Erro ao criar heatmap: {e!s}")
         return None
@@ -455,25 +449,27 @@ def create_bar_chart(
     return fig
 
 
+# Gráficos de energia gerada por ano
 def plot_energy_production_by_year(df: pd.DataFrame) -> None:
     """Exibe o total de energia gerada por ano com cores gradientes de verde."""
     try:
-        if not {"Year", "Energy"}.issubset(df.columns):
+
+
+        # Valida os dados
+        if not validate_energy_year_data(df):
             st.error("Dados incompletos: faltam colunas 'Year' ou 'Energy'")
             return
 
-        total_data = df.groupby("Year")["Energy"].sum().reset_index()
+        # Agrega os dados por ano
+        total_data = aggregate_energy_by_year(df)
+
+        # Define a escala de cores
         colorscale = Colors.GREEN_SEQUENTIAL
 
-        # Normaliza os valores para a escala de cores
-        min_energy = total_data["Energy"].min()
-        max_energy = total_data["Energy"].max()
-        normalized = (total_data["Energy"] - min_energy) / (max_energy - min_energy)
+        # Calcula o mapeamento de cores
+        colors = calculate_color_mapping(total_data, "Energy", colorscale)
 
-        # Mapeia para cores
-        color_indices = (normalized * (len(colorscale) - 1)).astype(int)
-        colors = [colorscale[i] for i in color_indices]
-
+        # Cria o gráfico de barras
         fig = create_bar_chart(
             data=total_data,
             x="Year",
@@ -487,7 +483,7 @@ def plot_energy_production_by_year(df: pd.DataFrame) -> None:
         # Remove a legenda de cores (opcional)
         fig.update_layout(showlegend=False)
 
+        # Exibe o gráfico
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-
     except Exception as e:
         st.error(f"Erro ao gerar gráfico: {e!s}")
