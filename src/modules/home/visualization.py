@@ -242,7 +242,12 @@ def create_comparison_line_chart(
 
 
 def apply_line_chart_defaults(
-    fig: go.Figure, xlabel: str, ylabel: str, month_mapping: dict[int, str]
+    fig: go.Figure,
+    xlabel: str,
+    ylabel: str,
+    month_mapping: dict[int, str],
+    show_legend: bool = True,
+    height: int = 550,
 ) -> None:
     """
     Aplica configurações padrão para gráficos de linhas comparativos.
@@ -254,33 +259,70 @@ def apply_line_chart_defaults(
         month_mapping: Dicionário de mapeamento de meses
     """
     fig.update_layout(
-        xaxis={
-            "title": {"text": xlabel, "font": {"size": 14, "color": "white"}},
-            "tickvals": list(month_mapping.keys()),
-            "ticktext": list(month_mapping.values()),
-            "tickangle": -45,
-            "gridcolor": "rgba(80, 80, 80, 0.3)",
-        },
-        yaxis={
-            "title": {"text": ylabel, "font": {"size": 14, "color": "white"}},
-            "gridcolor": "rgba(80, 80, 80, 0.3)",
-        },
+        # Configurações de eixo
+        xaxis=dict(
+            title_text=xlabel,
+            title_font=dict(size=14, color="white"),
+            tickvals=list(month_mapping.keys()),
+            ticktext=[
+                m.upper()[:3] for m in month_mapping.values()
+            ],  # Abreviações em maiúsculo
+            tickfont=dict(size=12, color="#555555"),
+            gridcolor="rgba(200,200,200,0.15)",
+            linecolor="#cccccc",
+            showgrid=False,  # Remove grid vertical
+            ticks="outside",
+            ticklen=6,
+        ),
+        yaxis=dict(
+            title_text=ylabel,
+            title_font=dict(size=14, color="white"),
+            tickfont=dict(size=12, color="#555555"),
+            gridcolor="rgba(200,200,200,0.3)",
+            linecolor="#cccccc",
+            zerolinecolor="rgba(200,200,200,0.5)",
+            tickformat=",.0f",  # Formato numérico
+        ),
+        # Layout geral
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
+        height=height,
+        margin=dict(l=80, r=50, t=100, b=80),
+        hoverlabel=dict(
+            bgcolor="white", bordercolor="#cccccc", font_size=12, font_color="#333333"
+        ),
         hovermode="x unified",
-        legend={
-            "title": "Ano",
-            "orientation": "h",
-            "y": -0.2,
-            "bgcolor": "rgba(0,0,0,0.3)",
-        },
-        margin=dict(l=50, r=30, t=80, b=50),
+        # Legenda (condicional)
+        legend=(
+            dict(
+                title_text="<b>ANO</b>",
+                orientation="h",
+                yanchor="bottom",
+                y=-0.4,
+                xanchor="center",
+                x=0.5,
+                font=dict(size=12),
+                bgcolor="rgba(0,0,0,0.3)",
+                bordercolor="#cccccc",
+            )
+            if show_legend
+            else None
+        ),
+        # Transição animada
+        transition={"duration": 300},
     )
 
     fig.update_traces(
-        line=dict(width=2.5),
-        marker=dict(size=8),
-        hovertemplate=f"<b>%{{fullData.name}}:</b> %{{y:,.2f}} kWh<br>{xlabel}: %{{x}}<extra></extra>",
+        line=dict(width=3),
+        marker=dict(
+            size=10, line=dict(width=1, color="white")  # Borda branca nos marcadores
+        ),
+        hovertemplate=(
+            "<b>%{fullData.name}</b><br>"
+            "%{x}: <b>%{y:,.0f} kWh</b><br>"
+            "<extra></extra>"
+        ),
+        mode="lines+markers",  # Sempre mostrar marcadores
     )
 
 

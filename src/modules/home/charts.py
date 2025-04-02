@@ -92,7 +92,7 @@ def plot_line_comparison_by_year(df):
             x_col="Month",
             y_col="Energy",
             color_col="Year",
-            title="Comparativo de Geração por Mês e Ano",
+            title="<b>Comparativo de Geração por Mês e Ano</b><br><sub>Comparativo por mês</sub>",
             colors=Colors.GREEN_DISCRETE,
             month_mapping=month_names,
         )
@@ -110,15 +110,9 @@ def plot_line_comparison_by_year(df):
         add_trend_annotations(fig, significant_trends, monthly_comparison)
 
         # Personalizações específicas
-        fig.update_layout(
-            title={
-                "text": "Comparativo de Geração por Mês e Ano",
-                "y": 0.95,
-                "x": 0.5,
-                "xanchor": "center",
-                "font": {"size": 18, "color": "white"},
-            }
-        )
+        # fig.update_layout(
+        #     title="<b>Comparativo de Geração por Mês e Ano</b><br><sub>Comparativo por mês</sub>",
+        # )
 
         st.plotly_chart(fig, use_container_width=True)
 
