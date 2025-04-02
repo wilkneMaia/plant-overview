@@ -144,6 +144,7 @@ def plot_energy_trend_by_year(df):
             colors=Colors.GREEN_DISCRETE,
             month_mapping=month_names,
             labels={"Energy": "Energia Gerada (kWh)"},
+            height=450,
         )
 
         # Aplicação de configurações
@@ -156,13 +157,14 @@ def plot_energy_trend_by_year(df):
 
         # Personalizações específicas
         fig.update_layout(
-            title={
-                "text": "Comparativo de Energia por Mês e Ano",
-                "y": 0.95,
-                "x": 0.5,
-                "xanchor": "center",
-                "font": {"size": 18, "color": "white"},
-            }
+            title="<b>EVOLUÇÃO ANUAL DA PRODUÇÃO</b><br><sub>Comparativo de Energia por Mês e Ano</sub>",
+            # title={
+            #     "text": "Comparativo de Energia por Mês e Ano",
+            #     "y": 0.95,
+            #     "x": 0.5,
+            #     "xanchor": "center",
+            #     "font": {"size": 18, "color": "white"},
+            # }
         )
 
         st.plotly_chart(fig, use_container_width=True)
@@ -245,6 +247,7 @@ def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
             title="<b>Produção Anual de Energia</b><br><sub>Comparativo por ano</sub>",
             color_scale=Colors.GREEN_SEQUENTIAL,
             unit=unit,
+            height=450,
         )
 
         # Aplicação do estilo

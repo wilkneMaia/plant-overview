@@ -1,4 +1,3 @@
-
 import pandas as pd
 import plotly.express as px
 from plotly import graph_objects as go
@@ -25,7 +24,7 @@ def apply_bar_chart_defaults(fig, xlabel: str, ylabel: str) -> None:
             "gridcolor": "#404040",
         },
         plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="#181818",
+        paper_bgcolor="rgba(0,0,0,0)",
         hovermode="x unified",
     )
 
@@ -185,7 +184,7 @@ def apply_area_chart_defaults(
             "gridcolor": "rgba(80, 80, 80, 0.3)",
         },
         plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="#181818",
+        paper_bgcolor="rgba(0,0,0,0)",
         hovermode="x unified",
         legend={
             "title": "Ano",
@@ -267,7 +266,7 @@ def apply_line_chart_defaults(
             "gridcolor": "rgba(80, 80, 80, 0.3)",
         },
         plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="#181818",
+        paper_bgcolor="rgba(0,0,0,0)",
         hovermode="x unified",
         legend={
             "title": "Ano",
@@ -422,7 +421,7 @@ def configure_heatmap_layout(
         yaxis_title="Microinversor",
         height=height,
         plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="#181818",
+        paper_bgcolor="rgba(0,0,0,0)",
         margin=dict(l=100, r=30, t=100, b=50),
     )
 
@@ -455,7 +454,7 @@ def apply_production_bar_style(
     fig.update_traces(
         marker=dict(line=dict(width=1.5, color="rgba(255,255,255,0.7)"), opacity=0.85),
         hovertemplate=(
-            f"<b>{xaxis_title} %{{x}}:</b><br>"  # Atualizado para usar o título personalizado
+            f"<b>{xaxis_title} %{{x}}:</b><br>"
             f"Produção: %{{y:,.0f}} {unit}<br>"
             "<extra></extra>"
         ),
@@ -476,7 +475,7 @@ def apply_production_bar_style(
             tickvals=data["Year"],
             gridcolor="rgba(100,100,100,0.1)",
             title_font=dict(size=14),
-            tickangle= -45,
+            tickangle=-45,
         ),
         yaxis=dict(
             title=f"Produção ({unit})",

@@ -97,6 +97,7 @@ class HomeView:
             plot_energy_production_by_year(data)
         with col2:
             plot_energy_trend_by_year(data)
+
         plot_line_comparison_by_year(data)
 
     def _display_microinverter_analysis(self, data: pd.DataFrame):
