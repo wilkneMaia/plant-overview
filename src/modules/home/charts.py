@@ -5,6 +5,8 @@ import streamlit as st
 from config.constants import Colors
 
 
+# --- Gráficos ---
+# Gráficos de energia gerada por microinversor
 def plot_energy_heatmap_by_microinverter(data):
     """
     Cria um heatmap com anos inteiros no eixo X e melhor legibilidade

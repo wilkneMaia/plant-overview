@@ -5,6 +5,7 @@ from config.constants import EconomicFactors, EnergyFactors, Icons
 from utils.helpers import load_icon_as_base64
 
 from .metrics import (
+    alculate_current_year_energy,
     calculate_coefficient_of_variation,
     calculate_current_month_energy,
     calculate_efficiency,
@@ -116,7 +117,8 @@ def display_system_overview_card(data: pd.DataFrame, microinverters=None):
     render_card("📋 Visão Geral do Sistema", rows)
 
 
-# Cards
+# --- Cards de Métricas ---
+# Card de resumo financeiro
 def display_revenue_card(data: pd.DataFrame, tariff_kwh=None):
     """
     Exibe o card de resumo financeiro.
@@ -138,14 +140,14 @@ def display_revenue_card(data: pd.DataFrame, tariff_kwh=None):
     rows = [
         {
             "icon": load_icon_as_base64(Icons.INCOME_TODAY),
-            "label": "Receita Mensal:",
+            "label": "Este mês:",
             "value": f"{current_month_energy * tariff_kwh:,.2f}",
             "unit": "R$",
             "help": f"Baseado na tarifa média de R${tariff_kwh:.2f}/kWh",
         },
         {
             "icon": load_icon_as_base64(Icons.INCOME_MONTH),
-            "label": "Receita Total:",
+            "label": "Total:",
             "value": f"{total_energy * tariff_kwh:,.2f}",
             "unit": "R$",
             "help": "Acumulado no período selecionado",
@@ -160,6 +162,7 @@ def display_revenue_card(data: pd.DataFrame, tariff_kwh=None):
     )
 
 
+# Card de energia gerada total
 def display_total_energy_card(data: pd.DataFrame):
     """
     Exibe o card de energia total gerada.
@@ -167,34 +170,33 @@ def display_total_energy_card(data: pd.DataFrame):
     Args:
         data (pd.DataFrame): DataFrame contendo os dados a serem analisados
     """
-    # Importa cálculos do arquivo metrics.py
-    from .metrics import calculate_current_month_energy, calculate_total_energy
 
     # Calcula as métricas
-    total_energy = calculate_total_energy(data)
+    total_energy_mwh = calculate_total_energy(data) / 1000
+    current_year_energy_mwh = alculate_current_year_energy(data) / 1000
     current_month_energy = calculate_current_month_energy(data)
 
     # Define as linhas do card
     rows = [
         create_row(
             icon=Icons.POWER_MONTH,
-            label="Energia Mensal:",
-            value=f"{current_month_energy:,.1f}",
+            label="Energia este mês:",
+            value=f"{current_month_energy:,.2f}",
             unit="kWh",
             help_text="Energia gerada no mês atual",
         ),
         create_row(
             icon=Icons.POWER_YEAR,
             label="Energia Anual:",
-            value=f"{data['Energy'].sum():,.1f}",
-            unit="kWh",
+            value=f"{current_year_energy_mwh:,.2f}",
+            unit="MWh",
             help_text="Energia gerada no ano atual",
         ),
         create_row(
             icon=Icons.POWER_TOTAL,
             label="Energia Total:",
-            value=f"{total_energy:,.1f}",
-            unit="kWh",
+            value=f"{total_energy_mwh:,.2f}",
+            unit="MWh",
             help_text="Energia total gerada no período selecionado",
         ),
     ]
@@ -203,6 +205,7 @@ def display_total_energy_card(data: pd.DataFrame):
     render_card("⚡ Energia Total", rows)
 
 
+# Card de impacto ambiental
 def display_environmental_card(data: pd.DataFrame):
     """Exibe o card de impacto ambiental."""
     total_energy = data["Energy"].sum()
@@ -231,6 +234,7 @@ def display_environmental_card(data: pd.DataFrame):
     )
 
 
+# Card de desvio padrão, eficiência e coeficiente de variação
 def display_efficiency_card(data: pd.DataFrame):
     """Exibe o card de desvio padrão, eficiência e coeficiente de variação."""
     # Calcula as métricas usando funções externas
