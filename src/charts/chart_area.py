@@ -1,31 +1,31 @@
 import pandas as pd
 import plotly.express as px
-from plotly import graph_objects as go
 import streamlit as st
+
 
 class AreaChart:
     """Classe para criação de gráficos de área com suporte a temas dark/light"""
 
     # Configurações de tema padrão
     THEME_SETTINGS = {
-        'dark': {
-            'title_color': 'white',
-            'subtitle_color': '#AAAAAA',
-            'axis_color': 'white',
-            'bg_color': 'rgba(0,0,0,0)',
-            'plot_bg_color': 'rgba(0,0,0,0)',
-            'grid_color': 'rgba(80,80,80,0.3)',
-            'legend_bg': 'rgba(40,40,40,0.7)'
+        "dark": {
+            "title_color": "white",
+            "subtitle_color": "#AAAAAA",
+            "axis_color": "white",
+            "bg_color": "rgba(0,0,0,0)",
+            "plot_bg_color": "rgba(0,0,0,0)",
+            "grid_color": "rgba(80,80,80,0.3)",
+            "legend_bg": "rgba(40,40,40,0.7)",
         },
-        'light': {
-            'title_color': '#333333',
-            'subtitle_color': '#666666',
-            'axis_color': '#333333',
-            'bg_color': 'white',
-            'plot_bg_color': 'white',
-            'grid_color': 'rgba(200,200,200,0.3)',
-            'legend_bg': 'rgba(240,240,240,0.7)'
-        }
+        "light": {
+            "title_color": "#333333",
+            "subtitle_color": "#666666",
+            "axis_color": "#333333",
+            "bg_color": "white",
+            "plot_bg_color": "white",
+            "grid_color": "rgba(200,200,200,0.3)",
+            "legend_bg": "rgba(240,240,240,0.7)",
+        },
     }
 
     def __init__(
@@ -36,7 +36,7 @@ class AreaChart:
         color_col: str,
         colors: list[str],
         period_mapping: dict,
-        theme: str = 'dark',  # 'dark' ou 'light'
+        theme: str = "dark",  # 'dark' ou 'light'
         title: str = "",
         subtitle: str = "",
         height: int = 450,
@@ -44,7 +44,6 @@ class AreaChart:
         xaxis_title: str = "Mês",
         yaxis_title: str = "Energia Gerada (kWh)",
         legend_title: str = "Ano",
-
     ):
         """
         Inicializa o gráfico com configurações de tema
@@ -77,7 +76,7 @@ class AreaChart:
 
     def _create_figure(self):
         """Cria a figura do gráfico com as configurações iniciais"""
-        theme = self.THEME_SETTINGS[self.theme]
+        self.THEME_SETTINGS[self.theme]
 
         self.fig = px.area(
             self.data,
@@ -87,7 +86,7 @@ class AreaChart:
             color_discrete_sequence=self.colors,
             height=self.height,
             labels={self.y_col: f"{self.y_col} ({self.unit})"},
-            template="plotly_dark" if self.theme == 'dark' else None
+            template="plotly_dark" if self.theme == "dark" else None,
         )
 
         # Aplica configurações iniciais de tema
@@ -99,28 +98,21 @@ class AreaChart:
 
         # Configuração padrão do título
         self.set_titles(
-            title_font={
-                "size": 22,
-                "color": theme['title_color'],
-                "family": "Arial"
-            },
+            title_font={"size": 22, "color": theme["title_color"], "family": "Arial"},
             subtitle_font={
                 "size": 16,
-                "color": theme['subtitle_color'],
-                "family": "Arial"
-            }
+                "color": theme["subtitle_color"],
+                "family": "Arial",
+            },
         )
 
         # Configuração do estilo base
         self.apply_style(
-            bg_color=theme['bg_color'],
-            plot_bg_color=theme['plot_bg_color'],
-            axis_font={
-                "size": 14,
-                "color": theme['axis_color']
-            },
-            grid_color=theme['grid_color'],
-            legend_bg=theme['legend_bg']
+            bg_color=theme["bg_color"],
+            plot_bg_color=theme["plot_bg_color"],
+            axis_font={"size": 14, "color": theme["axis_color"]},
+            grid_color=theme["grid_color"],
+            legend_bg=theme["legend_bg"],
         )
 
     def set_titles(
@@ -128,8 +120,8 @@ class AreaChart:
         title: str = None,
         subtitle: str = None,
         title_font: dict = None,
-        subtitle_font: dict = None
-    ) -> 'AreaChart':
+        subtitle_font: dict = None,
+    ) -> "AreaChart":
         """Configura título e subtítulo"""
         if title is not None:
             self.title = title
@@ -138,11 +130,19 @@ class AreaChart:
 
         self.fig.update_layout(
             title={
-                "text": f"<b>{self.title}</b><br><span style='font-size:{subtitle_font['size'] if subtitle_font else 16}px;color:{subtitle_font['color'] if subtitle_font else self.THEME_SETTINGS[self.theme]['subtitle_color']}'>{self.subtitle}</span>",
-                "font": title_font or {"size": 22, "color": self.THEME_SETTINGS[self.theme]['title_color']},
+                "text": (
+                    f"<b>{self.title}</b><br><span style='font-size:{subtitle_font['size'] if subtitle_font else 16}px;color:{subtitle_font['color'] if subtitle_font else self.THEME_SETTINGS[self.theme]['subtitle_color']}'>{self.subtitle}</span>"
+                ),
+                "font": (
+                    title_font
+                    or {
+                        "size": 22,
+                        "color": self.THEME_SETTINGS[self.theme]["title_color"],
+                    }
+                ),
                 "y": 0.95,
                 "x": 0.5,
-                "xanchor": "center"
+                "xanchor": "center",
             }
         )
         return self
@@ -156,29 +156,45 @@ class AreaChart:
         legend_bg: str = None,
         show_legend: bool = True,
         opacity: float = 0.7,
-        line_width: float = 1.5
-    ) -> 'AreaChart':
+        line_width: float = 1.5,
+    ) -> "AreaChart":
         """Aplica estilização ao gráfico"""
         theme = self.THEME_SETTINGS[self.theme]
 
         self.fig.update_layout(
+            hoverlabel=dict(
+                bgcolor="rgba(0, 0, 0, 0.8)",  # Fundo escuro semi-transparente
+                bordercolor="rgba(255, 255, 255, 0.5)",  # Borda branca semi-transparente
+                font_size=12,  # Tamanho da fonte
+                font_color="white"  # Texto em branco para melhor contraste
+            ),
             hovermode="x unified",
-            legend={
-                "title": {"text": self.legend_title, "font": {"size": 12}},
-                "orientation": "h",
-                "y": -0.2,
-                "bgcolor": legend_bg or theme['legend_bg']
-            } if show_legend else None,
+            legend=(
+                {
+                    "title": {"text": self.legend_title, "font": {"size": 12}},
+                    "orientation": "h",
+                    "y": -0.2,
+                    "bgcolor": legend_bg or theme["legend_bg"],
+                }
+                if show_legend
+                else None
+            ),
             xaxis={
-                "title": {"text": self.xaxis_title, "font": axis_font or {"size": 14, "color": theme['axis_color']}},
+                "title": {
+                    "text": self.xaxis_title,
+                    "font": axis_font or {"size": 14, "color": theme["axis_color"]},
+                },
                 "tickvals": list(self.period_mapping.keys()),
                 "ticktext": list(self.period_mapping.values()),
                 "tickangle": 0,
-                "gridcolor": grid_color or theme['grid_color']
+                "gridcolor": grid_color or theme["grid_color"],
             },
             yaxis={
-                "title": {"text": f"{self.yaxis_title} ({self.unit})", "font": axis_font or {"size": 14, "color": theme['axis_color']}},
-                "gridcolor": grid_color or theme['grid_color']
+                "title": {
+                    "text": f"{self.yaxis_title} ({self.unit})",
+                    "font": axis_font or {"size": 14, "color": theme["axis_color"]},
+                },
+                "gridcolor": grid_color or theme["grid_color"],
             },
             margin=dict(l=30, r=30, t=70, b=60),
         )
@@ -189,13 +205,21 @@ class AreaChart:
             self.fig.update_layout(plot_bgcolor=plot_bg_color)
 
         self.fig.update_traces(
+            # marker=dict(
+            #     size=6, line=dict(width=1, color="white")  # Borda branca nos marcadores
+            # ),
             opacity=opacity,
             line=dict(width=line_width),
-            hovertemplate=f"<b>{self.color_col} %{{color}}:</b> %{{y:,.2f}} {self.unit}<br>{self.x_col}: %{{x}}<extra></extra>"
+            hovertemplate=(
+                "<b>%{fullData.name}</b><br>"  # Apenas o nome do grupo
+                "Produção: %{y:,.0f} {self.unit}<br>"  # Formatação simplificada
+                "<extra></extra>"
+            ),
+            mode="lines+markers",
         )
         return self
 
-    def set_theme(self, theme: str) -> 'AreaChart':
+    def set_theme(self, theme: str) -> "AreaChart":
         """Altera o tema do gráfico (dark/light)"""
         if theme.lower() not in self.THEME_SETTINGS:
             raise ValueError(f"Tema '{theme}' inválido. Use 'dark' ou 'light'")
@@ -216,8 +240,8 @@ class AreaChart:
         font_size: int = 12,
         x_offset: float = 0,
         y_offset: float = 0,
-        **kwargs
-    ) -> 'AreaChart':
+        **kwargs,
+    ) -> "AreaChart":
         """
         Adiciona automaticamente uma anotação no ponto de pico de produção
 
@@ -244,10 +268,7 @@ class AreaChart:
             y=peak_data[self.y_col] + y_offset,
             showarrow=showarrow,
             arrowhead=arrowhead,
-            font=dict(
-                size=font_size,
-                color=theme['axis_color']
-            ),
-            **kwargs
+            font=dict(size=font_size, color=theme["axis_color"]),
+            **kwargs,
         )
         return self

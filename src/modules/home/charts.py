@@ -1,8 +1,8 @@
 import pandas as pd
 import streamlit as st
 
-from config.constants import Colors, FontSettings
 from charts.chart_area import AreaChart
+from config.constants import Colors, FontSettings
 
 from .metrics import (
     aggregate_energy_by_year,
@@ -65,7 +65,11 @@ def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
 
         # Aplicação do estilo
         apply_production_bar_style(
-            fig=fig, data=yearly_data, unit="MWh", xaxis_title="ANO", yaxis_title="Produção: "
+            fig=fig,
+            data=yearly_data,
+            unit="MWh",
+            xaxis_title="ANO",
+            yaxis_title="Produção: ",
         )
 
         # Exibição otimizada
@@ -99,35 +103,30 @@ def plot_energy_trend_by_year(df) -> None:
                 color_col="Year",
                 colors=Colors.GREEN_DISCRETE,
                 period_mapping=month_names,
-                theme='dark',
+                theme="dark",
                 title="Produção Energética",
-                subtitle="Comparativo Anual"
+                subtitle="Comparativo Anual",
             )
             .set_titles(
-                title="Produção Energética Anual",
-                subtitle="Comparativo Mensal por Ano"
+                title="Produção Energética Anual", subtitle="Comparativo Mensal por Ano"
             )
-            .apply_style(
-                opacity=0.8,
-                line_width=3
-            )
+            .apply_style(opacity=0.8, line_width=3)
             .add_peak_annotation(
                 text="Máxima Produção Anual",
                 font_size=14,
                 arrowhead=3,
                 y_offset=50,  # Ajusta 50 unidades acima do pico
                 bgcolor="rgba(200,200,200,0.3)",
-                bordercolor="#333333"
+                bordercolor="#333333",
             )
         )
         chart.show()
 
     except Exception as e:
-        st.error(f"Erro ao gerar gráfico: {str(e)}")
-        if 'monthly_data' in locals():
+        st.error(f"Erro ao gerar gráfico: {e!s}")
+        if "monthly_data" in locals():
             st.warning("Dados utilizados na tentativa:")
             st.dataframe(monthly_data.head())
-
 
 
 # Grafico de linhas comparativo
