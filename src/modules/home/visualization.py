@@ -128,115 +128,115 @@ def create_grouped_barchart(
 
 
 # ---> Area Chart
-def create_comparison_area_chart(
-    data: pd.DataFrame,
-    x_col: str,
-    y_col: str,
-    color_col: str,
-    colors: list[str],
-    month_mapping: dict[int, str],
-    title: str,
-    title_font: dict,
-    subtitle: str,
-    subtitle_font: dict,
-    height: int = 450,
-) -> go.Figure:
-    """
-    Cria gráfico de área comparativo com título e subtítulo formatados.
+# def create_comparison_area_chart(
+#     data: pd.DataFrame,
+#     x_col: str,
+#     y_col: str,
+#     color_col: str,
+#     colors: list[str],
+#     month_mapping: dict[int, str],
+#     title: str,
+#     title_font: dict,
+#     subtitle: str,
+#     subtitle_font: dict,
+#     height: int = 450,
+# ) -> go.Figure:
+#     """
+#     Cria gráfico de área comparativo com título e subtítulo formatados.
 
-    Args:
-        data: DataFrame com os dados
-        x_col: Coluna do eixo X (ex: 'Month')
-        y_col: Coluna do eixo Y (ex: 'Energy')
-        color_col: Coluna para diferenciação (ex: 'Year')
-        colors: Lista de cores
-        month_mapping: Dicionário {número: nome_mês}
-        title: Título principal do gráfico
-        title_font: Configurações de fonte para o título
-        subtitle: Subtítulo do gráfico
-        subtitle_font: Configurações de fonte para o subtítulo
-        height: Altura do gráfico (padrão: 450)
+#     Args:
+#         data: DataFrame com os dados
+#         x_col: Coluna do eixo X (ex: 'Month')
+#         y_col: Coluna do eixo Y (ex: 'Energy')
+#         color_col: Coluna para diferenciação (ex: 'Year')
+#         colors: Lista de cores
+#         month_mapping: Dicionário {número: nome_mês}
+#         title: Título principal do gráfico
+#         title_font: Configurações de fonte para o título
+#         subtitle: Subtítulo do gráfico
+#         subtitle_font: Configurações de fonte para o subtítulo
+#         height: Altura do gráfico (padrão: 450)
 
-    Returns:
-        Figura Plotly configurada
-    """
-    # Criação do gráfico
-    fig = px.area(
-        data,
-        x=x_col,
-        y=y_col,
-        color=color_col,
-        color_discrete_sequence=colors,
-        height=height,
-        labels={y_col: "Energia Gerada (kWh)"},
-        title=title,  # Título principal
-    )
+#     Returns:
+#         Figura Plotly configurada
+#     """
+#     # Criação do gráfico
+#     fig = px.area(
+#         data,
+#         x=x_col,
+#         y=y_col,
+#         color=color_col,
+#         color_discrete_sequence=colors,
+#         height=height,
+#         labels={y_col: "Energia Gerada (kWh)"},
+#         title=title,  # Título principal
+#     )
 
-    # Configuração do título e subtítulo
-    fig.update_layout(
-        title={
-            "text": (
-                f"<b>{title}</b><br><span style='font-size:{subtitle_font['size']}px;color:{subtitle_font['color']}'> {subtitle}</span>"
-            ),
-            "font": title_font,
-        }
-    )
+#     # Configuração do título e subtítulo
+#     fig.update_layout(
+#         title={
+#             "text": (
+#                 f"<b>{title}</b><br><span style='font-size:{subtitle_font['size']}px;color:{subtitle_font['color']}'> {subtitle}</span>"
+#             ),
+#             "font": title_font,
+#         }
+#     )
 
-    # Configuração do eixo X
-    fig.update_xaxes(
-        tickvals=list(month_mapping.keys()), ticktext=list(month_mapping.values())
-    )
+#     # Configuração do eixo X
+#     fig.update_xaxes(
+#         tickvals=list(month_mapping.keys()), ticktext=list(month_mapping.values())
+#     )
 
-    return fig
+#     return fig
 
-def apply_area_chart_style(
-    fig: go.Figure,
-    xlabel: str,
-    ylabel: str,
-    month_mapping: dict[int, str],
-    title_color: str = "white",
-    subtitle_color: str = "gray",
-) -> None:
-    """
-    Aplica configurações padrão para gráficos de área comparativos.
+# def apply_area_chart_style(
+#     fig: go.Figure,
+#     xlabel: str,
+#     ylabel: str,
+#     month_mapping: dict[int, str],
+#     title_color: str = "white",
+#     subtitle_color: str = "gray",
+# ) -> None:
+#     """
+#     Aplica configurações padrão para gráficos de área comparativos.
 
-    Args:
-        fig: Figura Plotly
-        xlabel: Label do eixo X
-        ylabel: Label do eixo Y
-        month_mapping: Dicionário de mapeamento de meses
-        title_color: Cor do título
-        subtitle_color: Cor do subtítulo
-    """
-    fig.update_layout(
-        xaxis={
-            "title": {"text": xlabel, "font": {"size": 14, "color": title_color}},
-            "tickvals": list(month_mapping.keys()),
-            "ticktext": list(month_mapping.values()),
-            "tickangle": 0,
-            "gridcolor": "rgba(80, 80, 80, 0.3)",
-        },
-        yaxis={
-            "title": {"text": ylabel, "font": {"size": 14, "color": title_color}},
-            "gridcolor": "rgba(80, 80, 80, 0.3)",
-        },
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        hovermode="x unified",
-        legend={
-            "title": "Ano",
-            "orientation": "h",
-            "y": -0.2,
-            "bgcolor": "rgba(0,0,0,0.3)",
-        },
-        margin=dict(l=50, r=30, t=80, b=50),
-    )
+#     Args:
+#         fig: Figura Plotly
+#         xlabel: Label do eixo X
+#         ylabel: Label do eixo Y
+#         month_mapping: Dicionário de mapeamento de meses
+#         title_color: Cor do título
+#         subtitle_color: Cor do subtítulo
+#     """
+#     fig.update_layout(
+#         xaxis={
+#             "title": {"text": xlabel, "font": {"size": 14, "color": title_color}},
+#             "tickvals": list(month_mapping.keys()),
+#             "ticktext": list(month_mapping.values()),
+#             "tickangle": 0,
+#             "gridcolor": "rgba(80, 80, 80, 0.3)",
+#         },
+#         yaxis={
+#             "title": {"text": ylabel, "font": {"size": 14, "color": title_color}},
+#             "gridcolor": "rgba(80, 80, 80, 0.3)",
+#         },
+#         plot_bgcolor="rgba(0,0,0,0)",
+#         paper_bgcolor="rgba(0,0,0,0)",
+#         hovermode="x unified",
+#         legend={
+#             "title": "Ano",
+#             "orientation": "h",
+#             "y": -0.2,
+#             "bgcolor": "rgba(0,0,0,0.3)",
+#         },
+#         margin=dict(l=50, r=30, t=80, b=50),
+#     )
 
-    fig.update_traces(
-        opacity=0.5,
-        line=dict(width=1),
-        hovertemplate=f"<b>Ano %{{color}}:</b> %{{y:,.2f}} kWh<br>{xlabel}: %{{x}}<extra></extra>",
-    )
+#     fig.update_traces(
+#         opacity=0.5,
+#         line=dict(width=1),
+#         hovertemplate=f"<b>Ano %{{color}}:</b> %{{y:,.2f}} kWh<br>{xlabel}: %{{x}}<extra></extra>",
+#     )
 
 
 def create_comparison_line_chart(

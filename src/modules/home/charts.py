@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 
 from config.constants import Colors, FontSettings
+from charts.chart_area import AreaChart
 
 from .metrics import (
     aggregate_energy_by_year,
@@ -21,11 +22,9 @@ from .metrics import (
 from .visualization import (
     add_average_lines,
     add_trend_annotations,
-    apply_area_chart_style,
     apply_grouped_barchart_defaults,
     apply_line_chart_defaults,
     apply_production_bar_style,
-    create_comparison_area_chart,
     create_comparison_line_chart,
     create_grouped_barchart,
     create_production_bar_chart,
@@ -87,39 +86,48 @@ def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
 # Gráficos de energia gerada por ano
 def plot_energy_trend_by_year(df) -> None:
     """Exibe um gráfico de área comparativo dos meses por ano"""
+
     try:
         # Processamento de dados
-        monthly_comparison = prepare_monthly_comparison_data(df)
+        monthly_data = prepare_monthly_comparison_data(df)
         month_names = get_month_names()
-
-        # Criação do gráfico
-        fig = create_comparison_area_chart(
-            data=monthly_comparison,
-            x_col="Month",
-            y_col="Energy",
-            color_col="Year",
-            colors=Colors.GREEN_DISCRETE,
-            month_mapping=month_names,
-            title="EVOLUÇÃO ANUAL DA PRODUÇÃO",
-            title_font=FontSettings.TITLE_CHART,
-            subtitle="Comparativo de Energia por Mês e Ano",
-            subtitle_font=FontSettings.SUBTITLE_CHART,
+        chart = (
+            AreaChart(
+                data=monthly_data,
+                x_col="Month",
+                y_col="Energy",
+                color_col="Year",
+                colors=Colors.GREEN_DISCRETE,
+                period_mapping=month_names,
+                theme='dark',
+                title="Produção Energética",
+                subtitle="Comparativo Anual"
+            )
+            .set_titles(
+                title="Produção Energética Anual",
+                subtitle="Comparativo Mensal por Ano"
+            )
+            .apply_style(
+                opacity=0.8,
+                line_width=3
+            )
+            .add_peak_annotation(
+                text="Máxima Produção Anual",
+                font_size=14,
+                arrowhead=3,
+                y_offset=50,  # Ajusta 50 unidades acima do pico
+                bgcolor="rgba(200,200,200,0.3)",
+                bordercolor="#333333"
+            )
         )
-
-        # Aplicação de configurações
-        # apply_area_chart_style(
-        #     fig=fig,
-        #     xlabel="Mês",
-        #     ylabel="Energia Gerada (kWh)",
-        #     month_mapping=month_names,
-        #     title_color="black",
-        #     subtitle_color="gray",
-        # )
-
-        st.plotly_chart(fig, use_container_width=True)
+        chart.show()
 
     except Exception as e:
-        handle_plot_error(e, df)
+        st.error(f"Erro ao gerar gráfico: {str(e)}")
+        if 'monthly_data' in locals():
+            st.warning("Dados utilizados na tentativa:")
+            st.dataframe(monthly_data.head())
+
 
 
 # Grafico de linhas comparativo
