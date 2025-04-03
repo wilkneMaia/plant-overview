@@ -77,8 +77,8 @@ def plot_energy_heatmap_by_microinverter(data):
 
 
 # Grafico de linhas comparativo
-def plot_line_comparison_by_year(df):
-    """Exibe gráfico de linhas comparativo com análises de tendência"""
+def plot_line_comparison_by_year(df) -> None:
+    """Exibe gráfico de linhas comparativo com análises de tendência aprimorado"""
     try:
         # Processamento de dados
         monthly_comparison = prepare_monthly_comparison_data(df)
@@ -86,13 +86,16 @@ def plot_line_comparison_by_year(df):
         yearly_averages = calculate_yearly_averages(monthly_comparison)
         significant_trends = detect_significant_trends(monthly_comparison)
 
-        # Criação do gráfico base
+        # Criação do gráfico usando a nova função
         fig = create_comparison_line_chart(
             data=monthly_comparison,
             x_col="Month",
             y_col="Energy",
             color_col="Year",
-            title="<b>Comparativo de Geração por Mês e Ano</b><br><sub>Comparativo por mês</sub>",
+            title="EVOLUÇÃO MENSAL DA PRODUÇÃO",
+            subtitle="Comparativo de Geração por Mês e Ano",
+            title_font=FontSettings.TITLE_CHART,
+            subtitle_font=FontSettings.SUBTITLE_CHART,
             colors=Colors.GREEN_DISCRETE,
             month_mapping=month_names,
         )
@@ -100,19 +103,14 @@ def plot_line_comparison_by_year(df):
         # Aplicação de configurações padrão
         apply_line_chart_defaults(
             fig=fig,
-            xlabel="Mês",
-            ylabel="Energia Gerada (kWh)",
+            xlabel="<b>MÊS</b>",
+            ylabel="<b>ENERGIA GERADA (kWh)</b>",
             month_mapping=month_names,
         )
 
         # Elementos adicionais
         add_average_lines(fig, yearly_averages, Colors.GREEN_DISCRETE)
         add_trend_annotations(fig, significant_trends, monthly_comparison)
-
-        # Personalizações específicas
-        # fig.update_layout(
-        #     title="<b>Comparativo de Geração por Mês e Ano</b><br><sub>Comparativo por mês</sub>",
-        # )
 
         st.plotly_chart(fig, use_container_width=True)
 
@@ -229,15 +227,17 @@ def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
             data=yearly_data,
             x_col="Year",
             y_col="Energy",
-            title="<b>Produção Anual de Energia</b><br><sub>Comparativo por ano</sub>",
+            title="PRODUÇÃO ANUAL DE ENERGIA",
+            subtitle="Comparativo por Ano",
+            title_font=FontSettings.TITLE_CHART,
+            subtitle_font=FontSettings.SUBTITLE_CHART,
             color_scale=Colors.GREEN_SEQUENTIAL,
             unit=unit,
-            height=450,
         )
 
         # Aplicação do estilo
         apply_production_bar_style(
-            fig=fig, data=yearly_data, unit="MWh", xaxis_title="Ano"
+            fig=fig, data=yearly_data, unit="MWh", xaxis_title="ANO"
         )
 
         # Exibição otimizada

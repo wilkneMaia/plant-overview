@@ -245,26 +245,33 @@ def create_comparison_line_chart(
     y_col: str,
     color_col: str,
     title: str,
+    subtitle: str,
+    title_font: dict,
+    subtitle_font: dict,
     colors: list[str],
     month_mapping: dict[int, str],
     **kwargs,
 ) -> go.Figure:
     """
-    Cria gráfico de linhas comparativo padronizado.
+    Cria gráfico de linhas comparativo padronizado com título e subtítulo formatados.
 
     Args:
         data: DataFrame com os dados
-        x_col: Coluna para eixo X (ex: 'Month')
-        y_col: Coluna para eixo Y (ex: 'Energy')
+        x_col: Coluna do eixo X (ex: 'Month')
+        y_col: Coluna do eixo Y (ex: 'Energy')
         color_col: Coluna para diferenciação (ex: 'Year')
-        title: Título do gráfico
+        title: Título principal do gráfico
+        subtitle: Subtítulo do gráfico
+        title_font: Configurações de fonte para o título
+        subtitle_font: Configurações de fonte para o subtítulo
         colors: Lista de cores
         month_mapping: Dicionário de mapeamento de meses
 
     Returns:
         Figura Plotly configurada
     """
-    return px.line(
+    # Criação do gráfico de linhas
+    fig = px.line(
         data,
         x=x_col,
         y=y_col,
@@ -272,10 +279,27 @@ def create_comparison_line_chart(
         markers=True,
         title=title,
         color_discrete_sequence=colors,
-        template="plotly_dark",
         labels={y_col: "Energia Gerada (kWh)"},
+        height=450,
         **kwargs,
     )
+
+    # Definindo o título e o subtítulo
+    fig.update_layout(
+        title={
+            "text": (
+                f"<b>{title}</b><br><span style='font-size:{subtitle_font['size']}px;color:{subtitle_font['color']}'> {subtitle}</span>"
+            ),
+            "font": title_font,
+        }
+    )
+
+    # Configuração do eixo X
+    fig.update_xaxes(
+        tickvals=list(month_mapping.keys()), ticktext=list(month_mapping.values())
+    )
+
+    return fig
 
 
 def apply_line_chart_defaults(
@@ -557,7 +581,7 @@ def apply_production_bar_style(
             tickangle=0,
         ),
         yaxis=dict(
-            title=f"Produção ({unit})",
+            title=f"PRODUÇÃO ({unit})",
             gridcolor="rgba(100,100,100,0.1)",
             zerolinecolor="rgba(100,100,100,0.3)",
             title_font=dict(size=14),
@@ -571,9 +595,12 @@ def create_production_bar_chart(
     x_col: str,
     y_col: str,
     title: str,
+    subtitle: str,
+    title_font: dict,
+    subtitle_font: dict,
     color_scale: list,
     unit: str = "kWh",
-    height: int = 500,
+    height: int = 450,
 ) -> go.Figure:
     """
     Cria gráfico de barras de produção energética padronizado.
@@ -583,6 +610,9 @@ def create_production_bar_chart(
         x_col: Coluna para eixo X (ex: 'Year')
         y_col: Coluna para eixo Y (ex: 'Energy')
         title: Título principal
+        subtitle: Subtítulo do gráfico
+        title_font: Configurações de fonte para o título
+        subtitle_font: Configurações de fonte para o subtítulo
         color_scale: Escala de cores gradiente
         unit: Unidade de medida
         height: Altura do gráfico
@@ -590,7 +620,9 @@ def create_production_bar_chart(
     Returns:
         Figura Plotly configurada
     """
-    return px.bar(
+
+    # Criação do gráfico de barras
+    fig = px.bar(
         data,
         x=x_col,
         y=y_col,
@@ -601,3 +633,15 @@ def create_production_bar_chart(
         labels={y_col: f"Produção ({unit})", x_col: x_col.replace("_", " ")},
         height=height,
     )
+
+    # Definindo o título e o subtítulo
+    fig.update_layout(
+        title={
+            "text": (
+                f"<b>{title}</b><br><span style='font-size:{subtitle_font['size']}px;color:{subtitle_font['color']}'> {subtitle}</span>"
+            ),
+            "font": title_font,
+        }
+    )
+
+    return fig
