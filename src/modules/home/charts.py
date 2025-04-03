@@ -21,7 +21,7 @@ from .metrics import (
 from .visualization import (
     add_average_lines,
     add_trend_annotations,
-    apply_area_chart_defaults,
+    apply_area_chart_style,
     apply_grouped_barchart_defaults,
     apply_line_chart_defaults,
     apply_production_bar_style,
@@ -107,14 +107,14 @@ def plot_energy_trend_by_year(df) -> None:
         )
 
         # Aplicação de configurações
-        apply_area_chart_defaults(
-            fig=fig,
-            xlabel="Mês",
-            ylabel="Energia Gerada (kWh)",
-            month_mapping=month_names,
-            title_color="black",
-            subtitle_color="gray",
-        )
+        # apply_area_chart_style(
+        #     fig=fig,
+        #     xlabel="Mês",
+        #     ylabel="Energia Gerada (kWh)",
+        #     month_mapping=month_names,
+        #     title_color="black",
+        #     subtitle_color="gray",
+        # )
 
         st.plotly_chart(fig, use_container_width=True)
 

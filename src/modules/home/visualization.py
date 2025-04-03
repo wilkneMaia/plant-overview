@@ -127,6 +127,7 @@ def create_grouped_barchart(
     return fig
 
 
+# ---> Area Chart
 def create_comparison_area_chart(
     data: pd.DataFrame,
     x_col: str,
@@ -188,8 +189,7 @@ def create_comparison_area_chart(
 
     return fig
 
-
-def apply_area_chart_defaults(
+def apply_area_chart_style(
     fig: go.Figure,
     xlabel: str,
     ylabel: str,
@@ -575,6 +575,8 @@ def apply_production_bar_style(
         ),
         hoverlabel=dict(bgcolor="rgba(30,30,30,0.8)", font_size=12),
     )
+
+
 
 
 def create_production_bar_chart(
