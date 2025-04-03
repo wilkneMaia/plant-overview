@@ -66,7 +66,7 @@ def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
 
         # Aplicação do estilo
         apply_production_bar_style(
-            fig=fig, data=yearly_data, unit="MWh", xaxis_title="ANO"
+            fig=fig, data=yearly_data, unit="MWh", xaxis_title="ANO", yaxis_title="Produção: "
         )
 
         # Exibição otimizada

@@ -523,9 +523,10 @@ def create_safe_heatmap(
 def apply_production_bar_style(
     fig: go.Figure,
     data: pd.DataFrame,
-    unit: str = "kWh",
+    unit: str,
     margin: dict | None = None,
-    xaxis_title: str = "Ano",
+    xaxis_title: str | None = None,
+    yaxis_title: str | None = None,
 ) -> None:
     """
     Aplica estilo avançado ao gráfico de produção.
@@ -536,6 +537,7 @@ def apply_production_bar_style(
         unit: Unidade de medida
         margin: Dicionário com margens personalizadas
         xaxis_title: Título personalizado para o eixo X (padrão: "Ano")
+        yaxis_title: Título personalizado para o eixo Y (padrão: "Produção: ")
     """
     margin = margin or dict(l=60, r=30, t=90, b=60)
 
@@ -543,7 +545,7 @@ def apply_production_bar_style(
         marker=dict(line=dict(width=1.5, color="rgba(255,255,255,0.7)"), opacity=0.85),
         hovertemplate=(
             f"<b>{xaxis_title} %{{x}}:</b><br>"
-            f"Produção: %{{y:,.0f}} {unit}<br>"
+            f"{yaxis_title} %{{y:,.0f}} {unit}<br>"
             "<extra></extra>"
         ),
         texttemplate="%{y:,.0f}",
