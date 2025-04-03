@@ -25,7 +25,6 @@ from .visualization import (
     apply_grouped_barchart_defaults,
     apply_line_chart_defaults,
     apply_production_bar_style,
-    configure_heatmap_layout,
     create_comparison_area_chart,
     create_comparison_line_chart,
     create_grouped_barchart,
@@ -35,45 +34,92 @@ from .visualization import (
     validate_heatmap_input,
 )
 
-
 # --- Gráficos ---
-# Gráficos de energia gerada por microinversor
-def plot_energy_heatmap_by_microinverter(data):
+
+
+# Gráficos de energia gerada por ano
+def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
     """
-    Cria um heatmap com anos inteiros no eixo X e melhor legibilidade.
-    Versão refatorada usando funções externalizadas.
+    Exibe o total de energia gerada por ano com design aprimorado.
+
+    Args:
+        df: DataFrame com dados de produção
+        unit: Unidade de medida (padrão: kWh)
     """
     try:
-        # Validação e processamento
-        validate_heatmap_input(data)
-        df_agg = prepare_data_for_heatmap(data)
-        years = process_heatmap_years(df_agg.columns)
+        # Validação e preparação dos dados (mantido em metrics.py)
+        validate_columns(df, {"Year", "Energy"})
+        yearly_data = aggregate_energy_by_year(df)
 
-        # Cálculo de altura com fallback
-        try:
-            height = calculate_heatmap_height(df_agg)
-        except Exception as e:
-            height = 600
-            st.warning(f"Usando altura padrão: {e}")
-
-        # Criação e configuração do heatmap
-        fig = create_safe_heatmap(
-            data_values=df_agg.values,
-            years=years,
-            microinverters=df_agg.index.astype(str),
+        # Criação do gráfico usando funções de visualization.py
+        fig = create_production_bar_chart(
+            data=yearly_data,
+            x_col="Year",
+            y_col="Energy",
+            title="PRODUÇÃO ANUAL DE ENERGIA",
+            subtitle="Comparativo por Ano",
+            title_font=FontSettings.TITLE_CHART,
+            subtitle_font=FontSettings.SUBTITLE_CHART,
             color_scale=Colors.GREEN_SEQUENTIAL,
-            height=height,
+            unit=unit,
         )
 
-        configure_heatmap_layout(
-            fig=fig, title="Energia por Ano e Microinversor", height=height, years=years
+        # Aplicação do estilo
+        apply_production_bar_style(
+            fig=fig, data=yearly_data, unit="MWh", xaxis_title="ANO"
         )
 
-        return fig
+        # Exibição otimizada
+        st.plotly_chart(
+            fig,
+            use_container_width=True,
+            config={
+                "displayModeBar": True,
+                "modeBarButtonsToRemove": ["toImage", "lasso2d"],
+                "displaylogo": False,
+            },
+        )
 
     except Exception as e:
-        handle_heatmap_error(e, data)
-        return None
+        handle_plot_error(e, df)
+
+
+# Gráficos de energia gerada por ano
+def plot_energy_trend_by_year(df) -> None:
+    """Exibe um gráfico de área comparativo dos meses por ano"""
+    try:
+        # Processamento de dados
+        monthly_comparison = prepare_monthly_comparison_data(df)
+        month_names = get_month_names()
+
+        # Criação do gráfico
+        fig = create_comparison_area_chart(
+            data=monthly_comparison,
+            x_col="Month",
+            y_col="Energy",
+            color_col="Year",
+            colors=Colors.GREEN_DISCRETE,
+            month_mapping=month_names,
+            title="EVOLUÇÃO ANUAL DA PRODUÇÃO",
+            title_font=FontSettings.TITLE_CHART,
+            subtitle="Comparativo de Energia por Mês e Ano",
+            subtitle_font=FontSettings.SUBTITLE_CHART,
+        )
+
+        # Aplicação de configurações
+        apply_area_chart_defaults(
+            fig=fig,
+            xlabel="Mês",
+            ylabel="Energia Gerada (kWh)",
+            month_mapping=month_names,
+            title_color="black",
+            subtitle_color="gray",
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    except Exception as e:
+        handle_plot_error(e, df)
 
 
 # Grafico de linhas comparativo
@@ -111,44 +157,6 @@ def plot_line_comparison_by_year(df) -> None:
         # Elementos adicionais
         add_average_lines(fig, yearly_averages, Colors.GREEN_DISCRETE)
         add_trend_annotations(fig, significant_trends, monthly_comparison)
-
-        st.plotly_chart(fig, use_container_width=True)
-
-    except Exception as e:
-        handle_plot_error(e, df)
-
-
-# Gráficos de energia gerada por ano
-def plot_energy_trend_by_year(df) -> None:
-    """Exibe um gráfico de área comparativo dos meses por ano"""
-    try:
-        # Processamento de dados
-        monthly_comparison = prepare_monthly_comparison_data(df)
-        month_names = get_month_names()
-
-        # Criação do gráfico
-        fig = create_comparison_area_chart(
-            data=monthly_comparison,
-            x_col="Month",
-            y_col="Energy",
-            color_col="Year",
-            colors=Colors.GREEN_DISCRETE,
-            month_mapping=month_names,
-            title="EVOLUÇÃO ANUAL DA PRODUÇÃO",
-            title_font=FontSettings.TITLE_CHART,
-            subtitle="Comparativo de Energia por Mês e Ano",
-            subtitle_font=FontSettings.SUBTITLE_CHART,
-        )
-
-        # Aplicação de configurações
-        apply_area_chart_defaults(
-            fig=fig,
-            xlabel="Mês",
-            ylabel="Energia Gerada (kWh)",
-            month_mapping=month_names,
-            title_color="black",
-            subtitle_color="gray",
-        )
 
         st.plotly_chart(fig, use_container_width=True)
 
@@ -208,48 +216,39 @@ def plot_microinverter_year_barchart(data):
         return None
 
 
-# Gráficos de energia gerada por ano
-def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
+# Gráfico de energia gerada por microinversor
+def plot_energy_heatmap_by_microinverter(data):
     """
-    Exibe o total de energia gerada por ano com design aprimorado.
-
-    Args:
-        df: DataFrame com dados de produção
-        unit: Unidade de medida (padrão: kWh)
+    Cria um heatmap com anos inteiros no eixo X e melhor legibilidade.
+    Versão refatorada usando funções externalizadas.
     """
     try:
-        # Validação e preparação dos dados (mantido em metrics.py)
-        validate_columns(df, {"Year", "Energy"})
-        yearly_data = aggregate_energy_by_year(df)
+        # Validação e processamento
+        validate_heatmap_input(data)
+        df_agg = prepare_data_for_heatmap(data)
+        years = process_heatmap_years(df_agg.columns)
 
-        # Criação do gráfico usando funções de visualization.py
-        fig = create_production_bar_chart(
-            data=yearly_data,
-            x_col="Year",
-            y_col="Energy",
-            title="PRODUÇÃO ANUAL DE ENERGIA",
-            subtitle="Comparativo por Ano",
+        # Cálculo de altura com fallback
+        try:
+            height = calculate_heatmap_height(df_agg)
+        except Exception as e:
+            height = 600
+            st.warning(f"Usando altura padrão: {e}")
+
+        # Criação e configuração do heatmap
+        fig = create_safe_heatmap(
+            data_values=df_agg.values,
+            years=years,
+            microinverters=df_agg.index.astype(str),
+            color_scale=Colors.GREEN_SEQUENTIAL,
+            title="Energia por Ano e Microinversor",
+            subtitle="Análise de Produção por Microinversor",
             title_font=FontSettings.TITLE_CHART,
             subtitle_font=FontSettings.SUBTITLE_CHART,
-            color_scale=Colors.GREEN_SEQUENTIAL,
-            unit=unit,
+            height=height,
         )
 
-        # Aplicação do estilo
-        apply_production_bar_style(
-            fig=fig, data=yearly_data, unit="MWh", xaxis_title="ANO"
-        )
-
-        # Exibição otimizada
-        st.plotly_chart(
-            fig,
-            use_container_width=True,
-            config={
-                "displayModeBar": True,
-                "modeBarButtonsToRemove": ["toImage", "lasso2d"],
-                "displaylogo": False,
-            },
-        )
-
+        return fig
     except Exception as e:
-        handle_plot_error(e, df)
+        handle_heatmap_error(e, data)
+        return None

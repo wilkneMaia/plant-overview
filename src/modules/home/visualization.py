@@ -474,22 +474,30 @@ def create_safe_heatmap(
     years: list,
     microinverters: list,
     color_scale: list,
+    title: str,
+    subtitle: str,
+    title_font: dict,
+    subtitle_font: dict,
     height: int = 600,
-) -> px.imshow:
+) -> go.Figure:
     """
-    Cria um heatmap com tratamento seguro de dados.
+    Cria um heatmap com tratamento seguro de dados e título formatado.
 
     Args:
         data_values: Valores da matriz do heatmap
         years: Lista de anos para eixo X
         microinverters: Lista de microinversores para eixo Y
         color_scale: Escala de cores
+        title: Título do gráfico
+        subtitle: Subtítulo do gráfico
+        title_font: Configurações de fonte para o título
+        subtitle_font: Configurações de fonte para o subtítulo
         height: Altura do gráfico
 
     Returns:
         Figura Plotly configurada
     """
-    return px.imshow(
+    fig = px.imshow(
         data_values,
         labels=dict(x="Ano", y="Microinversor", color="Energia (kWh)"),
         color_continuous_scale=color_scale,
@@ -499,40 +507,17 @@ def create_safe_heatmap(
         y=microinverters,
     )
 
-
-def configure_heatmap_layout(
-    fig: px.imshow, title: str, height: int, years: list
-) -> None:
-    """
-    Aplica configurações de layout ao heatmap.
-
-    Args:
-        fig: Figura Plotly
-        title: Título do gráfico
-        height: Altura do gráfico
-        years: Lista de anos para formatação
-    """
+    # Definindo o título e o subtítulo
     fig.update_layout(
         title={
-            "text": title,
-            "y": 0.95,
-            "x": 0.5,
-            "xanchor": "center",
-            "font": {"size": 18},
-        },
-        xaxis_title="Ano",
-        yaxis_title="Microinversor",
-        height=height,
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=100, r=30, t=100, b=50),
+            "text": (
+                f"<b>{title}</b><br><span style='font-size:{subtitle_font['size']}px;color:{subtitle_font['color']}'> {subtitle}</span>"
+            ),
+            "font": title_font,
+        }
     )
 
-    fig.update_xaxes(
-        tickvals=list(range(len(years))),
-        ticktext=[str(year) for year in years],
-        tickangle=0,
-    )
+    return fig
 
 
 def apply_production_bar_style(
@@ -645,3 +630,38 @@ def create_production_bar_chart(
     )
 
     return fig
+
+
+# def configure_heatmap_layout(
+#     fig: px.imshow, title: str, height: int, years: list
+# ) -> None:
+#     """
+#     Aplica configurações de layout ao heatmap.
+
+#     Args:
+#         fig: Figura Plotly
+#         title: Título do gráfico
+#         height: Altura do gráfico
+#         years: Lista de anos para formatação
+#     """
+#     fig.update_layout(
+#         title={
+#             "text": title,
+#             "y": 0.95,
+#             "x": 0.5,
+#             "xanchor": "center",
+#             "font": {"size": 18},
+#         },
+#         xaxis_title="Ano",
+#         yaxis_title="Microinversor",
+#         height=height,
+#         plot_bgcolor="rgba(0,0,0,0)",
+#         paper_bgcolor="rgba(0,0,0,0)",
+#         margin=dict(l=100, r=30, t=100, b=50),
+#     )
+
+#     fig.update_xaxes(
+#         tickvals=list(range(len(years))),
+#         ticktext=[str(year) for year in years],
+#         tickangle=0,
+#     )
