@@ -17,6 +17,17 @@ IconName = Literal[
 ]
 
 
+# --- Font Sizes ---
+class FontSettings:
+    TITLE_CHART: Final[dict] = {"size": 16, "color": "white", "family": "Arial"}
+    SUBTITLE_CHART: Final[dict] = {"size": 12, "color": "gray", "family": "Arial"}
+    AXIS_TITLE: Final[dict] = {"size": 14, "color": "black", "family": "Arial"}
+    TICK_LABEL: Final[dict] = {"size": 12, "color": "black", "family": "Arial"}
+    LEGEND_TITLE: Final[dict] = {"size": 12, "color": "black", "family": "Arial"}
+    HOVER_LABEL: Final[dict] = {"size": 12, "color": "black", "family": "Arial"}
+    DEFAULT_COLOR: Final[str] = "black"  # Cor padrão para textos
+
+
 # --- Ícones ---
 class Icons:
     POWER_MONTH = "icon-power-month"

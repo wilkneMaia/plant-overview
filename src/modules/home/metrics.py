@@ -420,3 +420,26 @@ def handle_heatmap_error(error: Exception, data: pd.DataFrame | None = None) -> 
     if data is not None and not data.empty:
         st.warning("Dados recebidos (amostra):")
         st.dataframe(data.head(3))
+
+
+def create_title_config(
+    main_title: str, subtitle: str, title_font: dict, subtitle_font: dict
+) -> dict:
+    """
+    Cria a configuração do título para o gráfico.
+
+    Args:
+        main_title: Título principal do gráfico
+        subtitle: Subtítulo do gráfico
+        title_font: Configurações de fonte para o título principal
+        subtitle_font: Configurações de fonte para o subtítulo
+
+    Returns:
+        Dicionário com a configuração do título
+    """
+    return {
+        "text": (
+            f"<b>{main_title}</b><br><span style='font-size:{subtitle_font['size']}px;color:{subtitle_font['color']}'> {subtitle}</span>"
+        ),
+        "font": title_font,
+    }

@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from config.constants import Colors
+from config.constants import Colors, FontSettings
 
 from .metrics import (
     aggregate_energy_by_year,
@@ -121,7 +121,7 @@ def plot_line_comparison_by_year(df):
 
 
 # Gráficos de energia gerada por ano
-def plot_energy_trend_by_year(df):
+def plot_energy_trend_by_year(df) -> None:
     """Exibe um gráfico de área comparativo dos meses por ano"""
     try:
         # Processamento de dados
@@ -134,11 +134,12 @@ def plot_energy_trend_by_year(df):
             x_col="Month",
             y_col="Energy",
             color_col="Year",
-            title="Comparativo de Energia por Mês e Ano",
             colors=Colors.GREEN_DISCRETE,
             month_mapping=month_names,
-            labels={"Energy": "Energia Gerada (kWh)"},
-            height=450,
+            title="EVOLUÇÃO ANUAL DA PRODUÇÃO",
+            title_font=FontSettings.TITLE_CHART,
+            subtitle="Comparativo de Energia por Mês e Ano",
+            subtitle_font=FontSettings.SUBTITLE_CHART,
         )
 
         # Aplicação de configurações
@@ -147,19 +148,8 @@ def plot_energy_trend_by_year(df):
             xlabel="Mês",
             ylabel="Energia Gerada (kWh)",
             month_mapping=month_names,
-        )
-
-        # Personalizações específicas
-        fig.update_layout(
-            title={
-                "text": (
-                    "<b>EVOLUÇÃO ANUAL DA PRODUÇÃO</b><br><sub>Comparativo de Energia por Mês e Ano</sub>"
-                ),
-                # "y": 0.95,
-                # "x": 0.5,
-                # "xanchor": "center",
-                "font": {"size": 14, "color": "white"},
-            }
+            title_color="black",
+            subtitle_color="gray",
         )
 
         st.plotly_chart(fig, use_container_width=True)
