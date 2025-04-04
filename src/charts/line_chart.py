@@ -45,7 +45,7 @@ class LineChart:
         title: str = "",
         subtitle: str = "",
         xlabel: str = "Mês",
-        ylabel: str = "Energia (kWh)",
+        ylabel: str = "Energia",
         legend_title: str = "Ano",
         height: int = 550,
         unit: str = "kWh",

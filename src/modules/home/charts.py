@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 
+from charts.bar_chart import BarChart
 from charts.chart_area import AreaChart
 from charts.line_chart import LineChart
 from config.constants import Colors, FontSettings
@@ -22,9 +23,7 @@ from .metrics import (
 )
 from .visualization import (
     apply_grouped_barchart_defaults,
-    apply_production_bar_style,
     create_grouped_barchart,
-    create_production_bar_chart,
     create_safe_heatmap,
     process_heatmap_years,
     validate_heatmap_input,
@@ -48,37 +47,59 @@ def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
         yearly_data = aggregate_energy_by_year(df)
 
         # Criação do gráfico usando funções de visualization.py
-        fig = create_production_bar_chart(
+        chart = BarChart(
             data=yearly_data,
             x_col="Year",
             y_col="Energy",
-            title="PRODUÇÃO ANUAL DE ENERGIA",
-            subtitle="Comparativo por Ano",
-            title_font=FontSettings.TITLE_CHART,
-            subtitle_font=FontSettings.SUBTITLE_CHART,
             color_scale=Colors.GREEN_SEQUENTIAL,
-            unit=unit,
-        )
-
-        # Aplicação do estilo
-        apply_production_bar_style(
-            fig=fig,
-            data=yearly_data,
+            theme="dark",
             unit="MWh",
-            xaxis_title="ANO",
-            yaxis_title="Produção: ",
+            xaxis_title="Ano",
+            yaxis_title="Produção (MWh)",
         )
 
-        # Exibição otimizada
-        st.plotly_chart(
-            fig,
-            use_container_width=True,
-            config={
-                "displayModeBar": True,
-                "modeBarButtonsToRemove": ["toImage", "lasso2d"],
-                "displaylogo": False,
-            },
+        # Personalização e exibição
+        (
+            chart.set_titles(
+                title="Produção Energética Anual",
+                subtitle="Dados consolidados 2020-2024",
+                title_font={"size": 24, "color": "white"},
+                subtitle_font={"size": 16, "color": "#CCCCCC"},
+            )
+            .apply_customizations(line_width=2, opacity=0.9)
+            .show()
         )
+        # fig = create_production_bar_chart(
+        #     data=yearly_data,
+        #     x_col="Year",
+        #     y_col="Energy",
+        #     title="PRODUÇÃO ANUAL DE ENERGIA",
+        #     subtitle="Comparativo por Ano",
+        #     title_font=FontSettings.TITLE_CHART,
+        #     subtitle_font=FontSettings.SUBTITLE_CHART,
+        #     color_scale=Colors.GREEN_SEQUENTIAL,
+        #     unit=unit,
+        # )
+
+        # # Aplicação do estilo
+        # apply_production_bar_style(
+        #     fig=fig,
+        #     data=yearly_data,
+        #     unit="MWh",
+        #     xaxis_title="ANO",
+        #     yaxis_title="Produção: ",
+        # )
+
+        # # Exibição otimizada
+        # st.plotly_chart(
+        #     fig,
+        #     use_container_width=True,
+        #     config={
+        #         "displayModeBar": True,
+        #         "modeBarButtonsToRemove": ["toImage", "lasso2d"],
+        #         "displaylogo": False,
+        #     },
+        # )
 
     except Exception as e:
         handle_plot_error(e, df)

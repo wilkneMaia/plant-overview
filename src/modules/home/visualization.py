@@ -260,118 +260,117 @@ def create_safe_heatmap(
     return fig
 
 
-def apply_production_bar_style(
-    fig: go.Figure,
-    data: pd.DataFrame,
-    unit: str,
-    margin: dict | None = None,
-    xaxis_title: str | None = None,
-    yaxis_title: str | None = None,
-) -> None:
-    """
-    Aplica estilo avançado ao gráfico de produção.
+# ---> Bar Chart
+# def apply_production_bar_style(
+#     fig: go.Figure,
+#     data: pd.DataFrame,
+#     unit: str,
+#     margin: dict | None = None,
+#     xaxis_title: str | None = None,
+#     yaxis_title: str | None = None,
+# ) -> None:
+#     """
+#     Aplica estilo avançado ao gráfico de produção.
 
-    Args:
-        fig: Figura Plotly
-        data: DataFrame usado no gráfico
-        unit: Unidade de medida
-        margin: Dicionário com margens personalizadas
-        xaxis_title: Título personalizado para o eixo X (padrão: "Ano")
-        yaxis_title: Título personalizado para o eixo Y (padrão: "Produção: ")
-    """
-    margin = margin or dict(l=60, r=30, t=90, b=60)
+#     Args:
+#         fig: Figura Plotly
+#         data: DataFrame usado no gráfico
+#         unit: Unidade de medida
+#         margin: Dicionário com margens personalizadas
+#         xaxis_title: Título personalizado para o eixo X (padrão: "Ano")
+#         yaxis_title: Título personalizado para o eixo Y (padrão: "Produção: ")
+#     """
+#     margin = margin or dict(l=60, r=30, t=90, b=60)
 
-    fig.update_traces(
-        marker=dict(line=dict(width=1.5, color="rgba(255,255,255,0.7)"), opacity=0.85),
-        hovertemplate=(
-            f"<b>{xaxis_title} %{{x}}:</b><br>"
-            f"{yaxis_title} %{{y:,.0f}} {unit}<br>"
-            "<extra></extra>"
-        ),
-        texttemplate="%{y:,.0f}",
-        textposition="outside",
-        textfont=dict(color="white", size=11),
-    )
+#     fig.update_traces(
+#         marker=dict(line=dict(width=1.5, color="rgba(255,255,255,0.7)"), opacity=0.85),
+#         hovertemplate=(
+#             f"<b>{xaxis_title} %{{x}}:</b><br>"
+#             f"{yaxis_title} %{{y:,.0f}} {unit}<br>"
+#             "<extra></extra>"
+#         ),
+#         texttemplate="%{y:,.0f}",
+#         textposition="outside",
+#         textfont=dict(color="white", size=11),
+#     )
 
-    fig.update_layout(
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        margin=margin,
-        showlegend=False,
-        coloraxis_showscale=False,
-        xaxis=dict(
-            title=xaxis_title,
-            tickmode="array",
-            tickvals=data["Year"],
-            gridcolor="rgba(100,100,100,0.1)",
-            title_font=dict(size=14),
-            tickangle=0,
-        ),
-        yaxis=dict(
-            title=f"PRODUÇÃO ({unit})",
-            gridcolor="rgba(100,100,100,0.1)",
-            zerolinecolor="rgba(100,100,100,0.3)",
-            title_font=dict(size=14),
-        ),
-        hoverlabel=dict(bgcolor="rgba(30,30,30,0.8)", font_size=12),
-    )
+#     fig.update_layout(
+#         plot_bgcolor="rgba(0,0,0,0)",
+#         paper_bgcolor="rgba(0,0,0,0)",
+#         margin=margin,
+#         showlegend=False,
+#         coloraxis_showscale=False,
+#         xaxis=dict(
+#             title=xaxis_title,
+#             tickmode="array",
+#             tickvals=data["Year"],
+#             gridcolor="rgba(100,100,100,0.1)",
+#             title_font=dict(size=14),
+#             tickangle=0,
+#         ),
+#         yaxis=dict(
+#             title=f"PRODUÇÃO ({unit})",
+#             gridcolor="rgba(100,100,100,0.1)",
+#             zerolinecolor="rgba(100,100,100,0.3)",
+#             title_font=dict(size=14),
+#         ),
+#         hoverlabel=dict(bgcolor="rgba(30,30,30,0.8)", font_size=12),
+#     )
+# def create_production_bar_chart(
+#     data: pd.DataFrame,
+#     x_col: str,
+#     y_col: str,
+#     title: str,
+#     subtitle: str,
+#     title_font: dict,
+#     subtitle_font: dict,
+#     color_scale: list,
+#     unit: str = "kWh",
+#     height: int = 450,
+# ) -> go.Figure:
+#     """
+#     Cria gráfico de barras de produção energética padronizado.
 
+#     Args:
+#         data: DataFrame com dados
+#         x_col: Coluna para eixo X (ex: 'Year')
+#         y_col: Coluna para eixo Y (ex: 'Energy')
+#         title: Título principal
+#         subtitle: Subtítulo do gráfico
+#         title_font: Configurações de fonte para o título
+#         subtitle_font: Configurações de fonte para o subtítulo
+#         color_scale: Escala de cores gradiente
+#         unit: Unidade de medida
+#         height: Altura do gráfico
 
-def create_production_bar_chart(
-    data: pd.DataFrame,
-    x_col: str,
-    y_col: str,
-    title: str,
-    subtitle: str,
-    title_font: dict,
-    subtitle_font: dict,
-    color_scale: list,
-    unit: str = "kWh",
-    height: int = 450,
-) -> go.Figure:
-    """
-    Cria gráfico de barras de produção energética padronizado.
+#     Returns:
+#         Figura Plotly configurada
+#     """
 
-    Args:
-        data: DataFrame com dados
-        x_col: Coluna para eixo X (ex: 'Year')
-        y_col: Coluna para eixo Y (ex: 'Energy')
-        title: Título principal
-        subtitle: Subtítulo do gráfico
-        title_font: Configurações de fonte para o título
-        subtitle_font: Configurações de fonte para o subtítulo
-        color_scale: Escala de cores gradiente
-        unit: Unidade de medida
-        height: Altura do gráfico
+#     # Criação do gráfico de barras
+#     fig = px.bar(
+#         data,
+#         x=x_col,
+#         y=y_col,
+#         title=title,
+#         color=y_col,
+#         color_continuous_scale=color_scale,
+#         text_auto=True,
+#         labels={y_col: f"Produção ({unit})", x_col: x_col.replace("_", " ")},
+#         height=height,
+#     )
 
-    Returns:
-        Figura Plotly configurada
-    """
+#     # Definindo o título e o subtítulo
+#     fig.update_layout(
+#         title={
+#             "text": (
+#                 f"<b>{title}</b><br><span style='font-size:{subtitle_font['size']}px;color:{subtitle_font['color']}'> {subtitle}</span>"
+#             ),
+#             "font": title_font,
+#         }
+#     )
 
-    # Criação do gráfico de barras
-    fig = px.bar(
-        data,
-        x=x_col,
-        y=y_col,
-        title=title,
-        color=y_col,
-        color_continuous_scale=color_scale,
-        text_auto=True,
-        labels={y_col: f"Produção ({unit})", x_col: x_col.replace("_", " ")},
-        height=height,
-    )
-
-    # Definindo o título e o subtítulo
-    fig.update_layout(
-        title={
-            "text": (
-                f"<b>{title}</b><br><span style='font-size:{subtitle_font['size']}px;color:{subtitle_font['color']}'> {subtitle}</span>"
-            ),
-            "font": title_font,
-        }
-    )
-
-    return fig
+#     return fig
 
 
 # ---> Line Chart
@@ -436,8 +435,6 @@ def create_production_bar_chart(
 #     )
 
 #     return fig
-
-
 # def apply_line_chart_defaults(
 #     fig: go.Figure,
 #     xlabel: str,
@@ -523,7 +520,6 @@ def create_production_bar_chart(
 #     )
 
 
-
 # ---> Area Chart
 # def create_comparison_area_chart(
 #     data: pd.DataFrame,
@@ -585,7 +581,6 @@ def create_production_bar_chart(
 #     )
 
 #     return fig
-
 # def apply_area_chart_style(
 #     fig: go.Figure,
 #     xlabel: str,

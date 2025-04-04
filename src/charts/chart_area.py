@@ -36,7 +36,7 @@ class AreaChart:
         color_col: str,
         colors: list[str],
         period_mapping: dict,
-        theme: str = "dark",  # 'dark' ou 'light'
+        theme: str = "dark",
         title: str = "",
         subtitle: str = "",
         height: int = 450,
