@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 
 from charts.chart_area import AreaChart
+from charts.line_chart import LineChart
 from config.constants import Colors, FontSettings
 
 from .metrics import (
@@ -20,12 +21,8 @@ from .metrics import (
     validate_columns,
 )
 from .visualization import (
-    add_average_lines,
-    add_trend_annotations,
     apply_grouped_barchart_defaults,
-    apply_line_chart_defaults,
     apply_production_bar_style,
-    create_comparison_line_chart,
     create_grouped_barchart,
     create_production_bar_chart,
     create_safe_heatmap,
@@ -112,7 +109,7 @@ def plot_energy_trend_by_year(df) -> None:
             )
             .apply_style(opacity=0.8, line_width=3)
             .add_peak_annotation(
-                text="Máxima Produção Anual",
+                text="Pico de Produção",
                 font_size=14,
                 arrowhead=3,
                 y_offset=50,  # Ajusta 50 unidades acima do pico
@@ -134,38 +131,36 @@ def plot_line_comparison_by_year(df) -> None:
     """Exibe gráfico de linhas comparativo com análises de tendência aprimorado"""
     try:
         # Processamento de dados
-        monthly_comparison = prepare_monthly_comparison_data(df)
+        monthly_data = prepare_monthly_comparison_data(df)
         month_names = get_month_names()
-        yearly_averages = calculate_yearly_averages(monthly_comparison)
-        significant_trends = detect_significant_trends(monthly_comparison)
+        calculate_yearly_averages(monthly_data)
+        detect_significant_trends(monthly_data)
 
         # Criação do gráfico usando a nova função
-        fig = create_comparison_line_chart(
-            data=monthly_comparison,
-            x_col="Month",
-            y_col="Energy",
-            color_col="Year",
-            title="EVOLUÇÃO MENSAL DA PRODUÇÃO",
-            subtitle="Comparativo de Geração por Mês e Ano",
-            title_font=FontSettings.TITLE_CHART,
-            subtitle_font=FontSettings.SUBTITLE_CHART,
-            colors=Colors.GREEN_DISCRETE,
-            month_mapping=month_names,
+        chart = (
+            LineChart(
+                data=monthly_data,
+                x_col="Month",
+                y_col="Energy",
+                color_col="Year",
+                colors=Colors.GREEN_DISCRETE,
+                period_mapping=month_names,
+                theme="dark",
+            )
+            .set_titles(
+                title="Análise de Produção", subtitle="Dados mensais consolidados"
+            )
+            .apply_style(line_width=3, marker_size=10, opacity=0.9)
+            .add_peak_annotation()
         )
 
-        # Aplicação de configurações padrão
-        apply_line_chart_defaults(
-            fig=fig,
-            xlabel="<b>MÊS</b>",
-            ylabel="<b>ENERGIA GERADA (kWh)</b>",
-            month_mapping=month_names,
-        )
+        chart.show()
 
         # Elementos adicionais
-        add_average_lines(fig, yearly_averages, Colors.GREEN_DISCRETE)
-        add_trend_annotations(fig, significant_trends, monthly_comparison)
+        # add_average_lines(fig, yearly_averages, Colors.GREEN_DISCRETE)
+        # add_trend_annotations(fig, significant_trends, monthly_data)
 
-        st.plotly_chart(fig, use_container_width=True)
+        # st.plotly_chart(fig, use_container_width=True)
 
     except Exception as e:
         handle_plot_error(e, df)
