@@ -29,104 +29,6 @@ def apply_bar_chart_defaults(fig, xlabel: str, ylabel: str) -> None:
     )
 
 
-def apply_grouped_barchart_defaults(
-    fig, xlabel: str, ylabel: str, height: int = 500
-) -> None:
-    """
-    Aplica padrões visuais para gráficos de barras agrupadas.
-
-    Args:
-        fig: Figura Plotly
-        xlabel: Label eixo X
-        ylabel: Label eixo Y
-        height: Altura do gráfico
-    """
-    fig.update_layout(
-        # Configurações de eixo
-        xaxis=dict(
-            title={"text": f"<b>{xlabel}</b>", "font": {"size": 14}},
-            tickangle=0,
-            type="category",
-        ),
-        yaxis=dict(
-            title={"text": f"<b>{ylabel}</b>", "font": {"size": 14}},
-        ),
-        # Legenda (condicional)
-        legend=dict(
-            title={"text": "<b>Microinversores Ativos</b>"},
-            orientation="h",
-            y=-0.18,
-            # x=0.5,
-            # xanchor="center",
-        ),
-        # Configurações de layout
-        height=height,
-        plot_bgcolor="rgba(0,0,0,0)",
-        margin={"t": 100, "b": 100},
-        bargap=0.3,
-        bargroupgap=0.1,
-    )
-
-    fig.update_traces(
-        marker_line_width=1,
-        marker_line_color="white",
-        opacity=0.9,
-        textposition="outside",
-        hovertemplate=(
-            "<b>%{customdata[0]}</b><br>"
-            "Ano: %{x}<br>"
-            "Produção: %{y:,.2f} kWh<br>"
-            "<extra></extra>"
-        ),
-    )
-
-
-def create_grouped_barchart(
-    data: pd.DataFrame,
-    x_col: str,
-    y_col: str,
-    color_col: str,
-    title: str,
-    colors: list[str],
-    text_auto: bool = True,
-    barmode: str = "group",
-) -> go.Figure:
-    """
-    Cria gráfico de barras agrupadas padronizado com tipagem correta.
-
-    Args:
-        data: DataFrame com os dados
-        x_col: Nome da coluna para eixo X
-        y_col: Nome da coluna para eixo Y
-        color_col: Coluna para diferenciação de cores
-        title: Título do gráfico
-        colors: Lista de cores (obrigatório)
-        text_auto: Mostrar valores nas barras (True/False ou string de formatação)
-        barmode: Tipo de agrupamento ('group', 'stack', etc.)
-
-    Returns:
-        Objeto Figure do Plotly
-
-    Exemplo:
-        >>> fig = create_grouped_barchart(df, "Year", "Energy", "Microinversor",
-        ...                             "Produção por Ano", ["#00AA00", "#007700"])
-    """
-    fig = px.bar(
-        data,
-        x=x_col,
-        y=y_col,
-        color=color_col,
-        barmode=barmode,
-        title=title,
-        color_discrete_sequence=colors,
-        text_auto=".2s" if text_auto is True else text_auto,
-        category_orders={x_col: sorted(data[x_col].unique())},
-        labels={x_col: x_col, y_col: y_col, color_col: color_col},
-    )
-
-    return fig
-
-
 def add_average_lines(
     fig: go.Figure, averages: dict, colors: list[str], x_range: tuple = (1, 12)
 ) -> None:
@@ -258,6 +160,105 @@ def create_safe_heatmap(
     )
 
     return fig
+
+
+# ---> Grouped Bar Chart
+# def apply_grouped_barchart_defaults(
+#     fig, xlabel: str, ylabel: str, height: int = 500
+# ) -> None:
+#     """
+#     Aplica padrões visuais para gráficos de barras agrupadas.
+
+#     Args:
+#         fig: Figura Plotly
+#         xlabel: Label eixo X
+#         ylabel: Label eixo Y
+#         height: Altura do gráfico
+#     """
+#     fig.update_layout(
+#         # Configurações de eixo
+#         xaxis=dict(
+#             title={"text": f"<b>{xlabel}</b>", "font": {"size": 14}},
+#             tickangle=0,
+#             type="category",
+#         ),
+#         yaxis=dict(
+#             title={"text": f"<b>{ylabel}</b>", "font": {"size": 14}},
+#         ),
+#         # Legenda (condicional)
+#         legend=dict(
+#             title={"text": "<b>Microinversores Ativos</b>"},
+#             orientation="h",
+#             y=-0.18,
+#             # x=0.5,
+#             # xanchor="center",
+#         ),
+#         # Configurações de layout
+#         height=height,
+#         plot_bgcolor="rgba(0,0,0,0)",
+#         margin={"t": 100, "b": 100},
+#         bargap=0.3,
+#         bargroupgap=0.1,
+#     )
+
+#     fig.update_traces(
+#         marker_line_width=1,
+#         marker_line_color="white",
+#         opacity=0.9,
+#         textposition="outside",
+#         hovertemplate=(
+#             "<b>%{customdata[0]}</b><br>"
+#             "Ano: %{x}<br>"
+#             "Produção: %{y:,.2f} kWh<br>"
+#             "<extra></extra>"
+#         ),
+#     )
+
+
+# def create_grouped_barchart(
+#     data: pd.DataFrame,
+#     x_col: str,
+#     y_col: str,
+#     color_col: str,
+#     title: str,
+#     colors: list[str],
+#     text_auto: bool = True,
+#     barmode: str = "group",
+# ) -> go.Figure:
+#     """
+#     Cria gráfico de barras agrupadas padronizado com tipagem correta.
+
+#     Args:
+#         data: DataFrame com os dados
+#         x_col: Nome da coluna para eixo X
+#         y_col: Nome da coluna para eixo Y
+#         color_col: Coluna para diferenciação de cores
+#         title: Título do gráfico
+#         colors: Lista de cores (obrigatório)
+#         text_auto: Mostrar valores nas barras (True/False ou string de formatação)
+#         barmode: Tipo de agrupamento ('group', 'stack', etc.)
+
+#     Returns:
+#         Objeto Figure do Plotly
+
+#     Exemplo:
+#         >>> fig = create_grouped_barchart(df, "Year", "Energy", "Microinversor",
+#         ...                             "Produção por Ano", ["#00AA00", "#007700"])
+#     """
+#     fig = px.bar(
+#         data,
+#         x=x_col,
+#         y=y_col,
+#         color=color_col,
+#         barmode=barmode,
+#         title=title,
+#         color_discrete_sequence=colors,
+#         text_auto=".2s" if text_auto is True else text_auto,
+#         category_orders={x_col: sorted(data[x_col].unique())},
+#         labels={x_col: x_col, y_col: y_col, color_col: color_col},
+#     )
+
+#     return fig
 
 
 # ---> Bar Chart

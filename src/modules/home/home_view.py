@@ -105,16 +105,34 @@ class HomeView:
         if data.empty:
             st.warning("Nenhum dado disponível com os filtros atuais")
             return
-        fig_heatmap = plot_microinverter_year_barchart(data)
-        if fig_heatmap:
-            st.plotly_chart(fig_heatmap, use_container_width=True)
-        else:
-            st.warning("Não foi possível gerar o heatmap")
-        chart = plot_energy_heatmap_by_microinverter(data)
-        if chart:
-            st.plotly_chart(chart, use_container_width=True)
-        else:
-            st.warning("Não foi possível gerar o gráfico com os dados fornecidos.")
+
+        # Verificar se as colunas necessárias estão presentes
+        required_columns = {"Microinversor", "Year", "Energy"}
+        if not required_columns.issubset(data.columns):
+            st.error(
+                f"Os dados fornecidos estão incompletos. Colunas necessárias: {required_columns}"
+            )
+            return
+
+        # Gráfico de barras agrupadas
+        try:
+            fig_barchart = plot_microinverter_year_barchart(data)
+            if fig_barchart:
+                st.plotly_chart(fig_barchart, use_container_width=True)
+            else:
+                st.warning("Não foi possível gerar o gráfico de barras agrupadas.")
+        except Exception as e:
+            st.error(f"Erro ao gerar o gráfico de barras agrupadas: {e}")
+
+        # Heatmap de energia
+        try:
+            fig_heatmap = plot_energy_heatmap_by_microinverter(data)
+            if fig_heatmap:
+                st.plotly_chart(fig_heatmap, use_container_width=True)
+            else:
+                st.warning("Não foi possível gerar o heatmap.")
+        except Exception as e:
+            st.error(f"Erro ao gerar o heatmap: {e}")
 
     # def display_efficiency_card(self, data: pd.DataFrame):
     #     """Exibe o card de desvio padrão, eficiência e coeficiente de variação."""

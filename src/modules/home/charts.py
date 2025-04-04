@@ -3,6 +3,7 @@ import streamlit as st
 
 from charts.bar_chart import BarChart
 from charts.chart_area import AreaChart
+from charts.grouped_bar_chart import GroupedBarChart
 from charts.line_chart import LineChart
 from config.constants import Colors, FontSettings
 
@@ -22,8 +23,6 @@ from .metrics import (
     validate_columns,
 )
 from .visualization import (
-    apply_grouped_barchart_defaults,
-    create_grouped_barchart,
     create_safe_heatmap,
     process_heatmap_years,
     validate_heatmap_input,
@@ -69,37 +68,6 @@ def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
             .apply_customizations(line_width=2, opacity=0.9)
             .show()
         )
-        # fig = create_production_bar_chart(
-        #     data=yearly_data,
-        #     x_col="Year",
-        #     y_col="Energy",
-        #     title="PRODUÇÃO ANUAL DE ENERGIA",
-        #     subtitle="Comparativo por Ano",
-        #     title_font=FontSettings.TITLE_CHART,
-        #     subtitle_font=FontSettings.SUBTITLE_CHART,
-        #     color_scale=Colors.GREEN_SEQUENTIAL,
-        #     unit=unit,
-        # )
-
-        # # Aplicação do estilo
-        # apply_production_bar_style(
-        #     fig=fig,
-        #     data=yearly_data,
-        #     unit="MWh",
-        #     xaxis_title="ANO",
-        #     yaxis_title="Produção: ",
-        # )
-
-        # # Exibição otimizada
-        # st.plotly_chart(
-        #     fig,
-        #     use_container_width=True,
-        #     config={
-        #         "displayModeBar": True,
-        #         "modeBarButtonsToRemove": ["toImage", "lasso2d"],
-        #         "displaylogo": False,
-        #     },
-        # )
 
     except Exception as e:
         handle_plot_error(e, df)
@@ -189,13 +157,7 @@ def plot_line_comparison_by_year(df) -> None:
 
 # Gráfico de barras agrupadas
 def plot_microinverter_year_barchart(data):
-    """
-    Gráfico de barras agrupadas com:
-    - Filtro automático de valores zero
-    - Legenda dinâmica
-    - Ordenação cronológica
-    - Tooltips detalhados
-    """
+    """Exibe gráfico de barras agrupadas com anotações de pico e médias"""
     try:
         # Validação e pré-processamento
         validate_columns(data, {"Microinversor", "Year", "Energy"})
@@ -205,38 +167,81 @@ def plot_microinverter_year_barchart(data):
 
         # Adiciona customdata para tooltips
         df_agg["Microinversor"] = df_agg["Microinversor"].astype(str)
-        custom_data = df_agg[["Microinversor"]]
+
+        # Dividir os valores de energia por 100 para exibir em MWh
+        df_agg["Energy"] = df_agg["Energy"] / 100
 
         # Construção do gráfico
-        fig = create_grouped_barchart(
+        chart = GroupedBarChart(
             data=df_agg,
             x_col="Year",
             y_col="Energy",
             color_col="Microinversor",
-            title="<b>Distribuição de Energia por Ano</b><br><sup>Microinversores com produção > 0</sup>",
             colors=Colors.GREEN_DISCRETE,
+            theme="dark",
+            ylabel="Produção (MWh)",
+            xlabel="Ano",
+            legend_title="Microinversor",
         )
 
-        # Aplica configurações visuais
-        apply_grouped_barchart_defaults(fig, "Ano", "Energia (kWh)")
-        fig.update_traces(customdata=custom_data)
-
-        # Adiciona nota explicativa
-        fig.add_annotation(
-            text="*Barras com valor zero são omitidas automaticamente",
-            xref="paper",
-            yref="paper",
-            x=0.5,
-            y=-0.30,
-            showarrow=False,
-            font={"size": 10, "color": "gray"},
-        )
+        fig = chart.fig
 
         return fig
 
     except Exception as e:
         handle_plot_error(e, data)
         return None
+
+        # .set_titles(
+        #     title="Distribuição de Energia por Ano",
+        #     subtitle="Microinversores com produção > 0",
+        # )
+        # .apply_style(
+        #     xaxis_title="Ano",
+        #     yaxis_title="Energia (kWh)",
+        #     line_width=2,
+        #     opacity=0.9,
+        # )
+        # .add_peak_annotation(
+        #     # text="Pico de Produção",
+        #     font_size=14,
+        #     arrowhead=3,
+        #     y_offset=50,
+        #     bgcolor="rgba(200,200,200,0.3)",
+        #     bordercolor="#333333",
+        # )
+        # )
+        # chart.show()
+
+        # fig = create_grouped_barchart(
+        #     data=df_agg,
+        #     x_col="Year",
+        #     y_col="Energy",
+        #     color_col="Microinversor",
+        #     title="<b>Distribuição de Energia por Ano</b><br><sup>Microinversores com produção > 0</sup>",
+        #     colors=Colors.GREEN_DISCRETE,
+        # )
+
+        # # Aplica configurações visuais
+        # apply_grouped_barchart_defaults(fig, "Ano", "Energia (kWh)")
+        # fig.update_traces(customdata=custom_data)
+
+        # # Adiciona nota explicativa
+        # fig.add_annotation(
+        #     text="*Barras com valor zero são omitidas automaticamente",
+        #     xref="paper",
+        #     yref="paper",
+        #     x=0.5,
+        #     y=-0.30,
+        #     showarrow=False,
+        #     font={"size": 10, "color": "gray"},
+        # )
+
+        # return fig
+
+    # except Exception as e:
+    #     handle_plot_error(e, data)
+    #     return None
 
 
 # Gráfico de energia gerada por microinversor
