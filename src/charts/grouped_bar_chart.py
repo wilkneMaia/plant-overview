@@ -38,6 +38,7 @@ class GroupedBarChart:
         colors: list[str],
         theme: str = "light",
         title: str = "",
+        subtitle: str = "",
         xlabel: str = "Categoria",
         ylabel: str = "Valor",
         height: int = 500,
@@ -67,14 +68,15 @@ class GroupedBarChart:
         self.y_col = y_col
         self.color_col = color_col
         self.colors = colors
-        self.theme = theme
+        self.theme = theme.lower()
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
         self.height = height
         self.text_auto = text_auto
         self.barmode = barmode
-        self.legend_title = legend_title
+        self.title = legend_title
+        self.subtitle = None
         self.theme_settings = self.THEME_SETTINGS.get(
             theme, self.THEME_SETTINGS["dark"]
         )
@@ -82,6 +84,7 @@ class GroupedBarChart:
         self.create_chart()
         self.set_layout()
         self.apply_style()
+        # self.add_peak_annotation()
         self.add_average_lines()
         # self.add_trend_annotations()
         self.add_legend()
@@ -165,7 +168,7 @@ class GroupedBarChart:
         """Adiciona a legenda ao gráfico."""
         self.fig.update_layout(
             legend=dict(
-                title=self.legend_title,
+                title=self.title,
                 font=dict(color=self.theme_settings["title_color"]),
                 bgcolor=self.theme_settings["legend_bg"],
                 bordercolor=self.theme_settings["grid_color"],
@@ -186,6 +189,22 @@ class GroupedBarChart:
             customdata=self.data[self.color_col],
             hovertemplate="%{x}: %{y}<br>%{customdata}<extra></extra>",
         )
+
+    # def add_peak_annotation(self):
+    #     """Adiciona anotações de pico ao gráfico."""
+    #     for i, row in self.data.iterrows():
+    #         self.fig.add_annotation(
+    #             x=row[self.x_col],
+    #             y=row[self.y_col],
+    #             text=f"{row[self.y_col]:,.0f}",
+    #             showarrow=True,
+    #             arrowhead=2,
+    #             ax=0,
+    #             ay=-40,
+    #             bgcolor=self.theme_settings['hover_bg'],
+    #             bordercolor=self.theme_settings['grid_color'],
+    #             font=dict(color=self.theme_settings['hover_font_color'])
+    #         )
 
     # def add_trend_annotations(self):
     #     """Adiciona anotações de tendência ao gráfico."""
