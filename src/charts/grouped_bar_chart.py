@@ -9,6 +9,7 @@ class GroupedBarChart:
     THEME_SETTINGS = {
         "dark": {
             "title_color": "white",
+            "subtitle_color": "#AAAAAA",
             "axis_color": "white",
             "bg_color": "rgba(0,0,0,0)",
             "grid_color": "rgba(80,80,80,0.3)",
@@ -19,6 +20,7 @@ class GroupedBarChart:
         },
         "light": {
             "title_color": "#333333",
+            "subtitle_color": "#666666",
             "axis_color": "#333333",
             "bg_color": "white",
             "grid_color": "rgba(200,200,200,0.3)",
@@ -36,12 +38,12 @@ class GroupedBarChart:
         y_col: str,
         color_col: str,
         colors: list[str],
-        theme: str = "light",
+        theme: str = "dark",
         title: str = "",
         subtitle: str = "",
         xlabel: str = "Categoria",
         ylabel: str = "Valor",
-        height: int = 500,
+        height: int = 450,
         text_auto: bool = True,
         barmode: str = "group",
         legend_title: str = "Legenda",
@@ -56,6 +58,7 @@ class GroupedBarChart:
             colors: Lista de cores para as barras.
             theme: 'dark' ou 'light' - define o esquema de cores.
             title: Título do gráfico.
+            subtitle: Subtítulo do gráfico.
             xlabel: Rótulo do eixo X.
             ylabel: Rótulo do eixo Y.
             height: Altura do gráfico.
@@ -70,6 +73,7 @@ class GroupedBarChart:
         self.colors = colors
         self.theme = theme.lower()
         self.title = title
+        self.subtitle = subtitle
         self.xlabel = xlabel
         self.ylabel = ylabel
         self.height = height
@@ -104,6 +108,64 @@ class GroupedBarChart:
             barmode=self.barmode,
         )
 
+        # Aplica configurações iniciais de tema
+        self._apply_theme_settings()
+
+    def _apply_theme_settings(self):
+        """Aplica as configurações visuais do tema selecionado."""
+        theme = self.THEME_SETTINGS[self.theme]
+
+        # Configuração padrão do título
+        self.set_titles(
+            title_font={"size": 22, "color": theme["title_color"], "family": "Arial"},
+            subtitle_font={
+                "size": 16,
+                "color": theme["subtitle_color"],
+                "family": "Arial",
+            },
+        )
+
+        # Configuração do estilo base
+        # self.apply_style(
+        #     bg_color=theme["bg_color"],
+        #     plot_bg_color=theme["bg_color"],
+        #     axis_font={"size": 14, "color": theme["axis_color"]},
+        #     grid_color=theme["grid_color"],
+        #     legend_bg=theme["legend_bg"],
+        # )
+
+    def set_titles(
+        self,
+        title: str = None,
+        subtitle: str = None,
+        title_font: dict = None,
+        subtitle_font: dict = None,
+    ) -> "GroupedBarChart":
+        """Configura título e subtítulo"""
+        if title is not None:
+            self.title = title
+        if subtitle is not None:
+            self.subtitle = subtitle
+
+        self.fig.update_layout(
+            title={
+                "text": (
+                    f"<b>{self.title}</b><br><span style='font-size:{subtitle_font['size'] if subtitle_font else 16}px;color:{subtitle_font['color'] if subtitle_font else self.THEME_SETTINGS[self.theme]['subtitle_color']}'>{self.subtitle}</span>"
+                ),
+                "font": (
+                    title_font
+                    or {
+                        "size": 22,
+                        "color": self.THEME_SETTINGS[self.theme]["title_color"],
+                    }
+                ),
+                "y": 0.95,
+                "x": 0.5,
+                "xanchor": "center",
+            }
+        )
+        return self
+
     def set_layout(self):
         """Define o layout do gráfico."""
         self.fig.update_layout(
@@ -113,6 +175,7 @@ class GroupedBarChart:
             plot_bgcolor=self.theme_settings["bg_color"],
             paper_bgcolor=self.theme_settings["bg_color"],
             font=dict(color=self.theme_settings["title_color"]),
+            margin=dict(l=30, r=145, t=90, b=30),
             xaxis=dict(
                 title_font=dict(size=14),
                 tickfont=dict(size=12),
@@ -126,7 +189,7 @@ class GroupedBarChart:
             ),
         )
 
-    def apply_style(self):
+    def apply_style(self) -> "GroupedBarChart":
         """Aplica o estilo ao gráfico."""
         self.fig.update_traces(
             marker=dict(

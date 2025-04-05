@@ -172,7 +172,7 @@ def plot_microinverter_year_barchart(data):
         df_agg["Energy"] = df_agg["Energy"] / 100
 
         # Construção do gráfico
-        chart = (GroupedBarChart(
+        chart = GroupedBarChart(
             data=df_agg,
             x_col="Year",
             y_col="Energy",
@@ -182,11 +182,7 @@ def plot_microinverter_year_barchart(data):
             ylabel="Produção (MWh)",
             xlabel="Ano",
             legend_title="Microinversor",
-        )
-            # .set_titles(
-            #     title="Análise de Produção", subtitle="Dados mensais consolidados"
-            # )
-        )
+        ).set_titles(title="Análise de Produção", subtitle="Dados mensais consolidados")
 
         fig = chart.fig
 
