@@ -5,7 +5,8 @@ from charts.bar_chart import BarChart
 from charts.chart_area import AreaChart
 from charts.grouped_bar_chart import GroupedBarChart
 from charts.line_chart import LineChart
-from config.constants import Colors, FontSettings
+from charts.safe_heatmap_chart import Heatmap
+from config.constants import Colors
 
 from .metrics import (
     aggregate_energy_by_year,
@@ -23,7 +24,6 @@ from .metrics import (
     validate_columns,
 )
 from .visualization import (
-    create_safe_heatmap,
     process_heatmap_years,
     validate_heatmap_input,
 )
@@ -258,25 +258,36 @@ def plot_energy_heatmap_by_microinverter(data):
 
         # Cálculo de altura com fallback
         try:
-            height = calculate_heatmap_height(df_agg)
+            calculate_heatmap_height(df_agg)
         except Exception as e:
-            height = 600
             st.warning(f"Usando altura padrão: {e}")
 
         # Criação e configuração do heatmap
-        fig = create_safe_heatmap(
-            data_values=df_agg.values,
-            years=years,
-            microinverters=df_agg.index.astype(str),
+        heatmap = Heatmap(
+            data_values=df_agg.values.tolist(),
+            x_labels=years,
+            y_labels=df_agg.index.tolist(),
             color_scale=Colors.GREEN_SEQUENTIAL,
-            title="Energia por Ano e Microinversor",
-            subtitle="Análise de Produção por Microinversor",
-            title_font=FontSettings.TITLE_CHART,
-            subtitle_font=FontSettings.SUBTITLE_CHART,
-            height=height,
+            theme="dark",
+            title="Produção de Energia por Ano",
+            subtitle="Microinversores",
+            xlabel="Ano",
+            ylabel="Microinversor",
+            height=450,
+            title_font={"size": 24, "color": "white"},
+            subtitle_font={"size": 16, "color": "#CCCCCC"},
+            margin=dict(l=30, r=145, t=90, b=30),
+        ).set_titles(
+            title="Distribuição de Energia por Ano",
+            subtitle="Microinversores com produção > 0",
+            title_font={"size": 24, "color": "white"},
+            subtitle_font={"size": 16, "color": "#CCCCCC"},
         )
 
+        # Exibição do heatmap
+        fig = heatmap.fig
         return fig
+
     except Exception as e:
         handle_heatmap_error(e, data)
         return None
