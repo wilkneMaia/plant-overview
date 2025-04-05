@@ -42,6 +42,7 @@ class Heatmap:
         subtitle_font: dict = None,
         unit: str = "kWh",
         margin: dict = None,
+        show_colorbar: bool = True,  # add parameter
     ):
         """
         Inicializa o heatmap.
@@ -61,6 +62,7 @@ class Heatmap:
             subtitle_font: Configurações de fonte para o subtítulo.
             unit: Unidade de medida.
             margin: Margens personalizadas.
+            show_colorbar: Show or hide colorbar
         """
         self.data_values = data_values
         self.x_labels = x_labels
@@ -76,6 +78,7 @@ class Heatmap:
         self.subtitle_font = subtitle_font
         self.unit = unit
         self.margin = margin
+        self.show_colorbar = show_colorbar  # assign to self
         self.theme_settings = self.THEME_SETTINGS.get(
             theme, self.THEME_SETTINGS["dark"]
         )
@@ -123,6 +126,9 @@ class Heatmap:
                 title={"text": f"<b>{self.xlabel}</b>", "font": {"size": 14}},
                 tickfont=dict(size=12, color=self.theme_settings["axis_color"]),
                 gridcolor=self.theme_settings["grid_color"],
+                tickmode="array",
+                tickvals=self.x_labels,
+                ticktext=self.x_labels,
             ),
             yaxis=dict(
                 title={"text": f"<b>{self.ylabel}</b>", "font": {"size": 14}},
@@ -131,6 +137,7 @@ class Heatmap:
             ),
             height=self.height,
             margin=self.margin,
+            coloraxis_showscale=self.show_colorbar,  # hide color scale if false
         )
 
     def apply_style(self):
