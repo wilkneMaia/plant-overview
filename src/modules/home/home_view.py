@@ -76,7 +76,6 @@ class HomeView:
 
         with col2:
             display_total_energy_card(data)
-
             display_environmental_card(data)
 
         with col3:
