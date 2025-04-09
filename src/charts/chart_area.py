@@ -42,7 +42,7 @@ class AreaChart:
         height: int = 450,
         unit: str = "kWh",
         xaxis_title: str = "Mês",
-        yaxis_title: str = "Energia Gerada (kWh)",
+        yaxis_title: str = "Energia Gerada",
         legend_title: str = "Ano",
     ):
         """
@@ -75,11 +75,17 @@ class AreaChart:
         self._create_figure()
 
     def _create_figure(self):
-        """Cria a figura do gráfico com as configurações iniciais"""
+        """Cria a figura do gráfico removendo completamente períodos zerados"""
         self.THEME_SETTINGS[self.theme]
 
+        # Agrupa por período (x_col) e filtra períodos que tem todos os valores zerados
+        filtered_data = self.data.groupby(self.x_col).filter(
+            lambda x: x[self.y_col].sum() > 0
+        )
+
+        # Cria o gráfico apenas com os dados filtrados
         self.fig = px.area(
-            self.data,
+            filtered_data,
             x=self.x_col,
             y=self.y_col,
             color=self.color_col,
@@ -89,23 +95,33 @@ class AreaChart:
             template="plotly_dark" if self.theme == "dark" else None,
         )
 
-        # Aplica configurações iniciais de tema
         self._apply_theme_settings()
 
     def _apply_theme_settings(self):
-        """Aplica as configurações visuais do tema selecionado"""
+        """Aplica configurações visuais ajustando os ticks para os períodos não zerados"""
         theme = self.THEME_SETTINGS[self.theme]
 
-        # Configuração padrão do título
-        self.set_titles(
-            title_font={"size": 22, "color": theme["title_color"], "family": "Arial"},
-            subtitle_font={
-                "size": 16,
-                "color": theme["subtitle_color"],
-                "family": "Arial",
+        # Identifica quais períodos têm pelo menos algum valor não-zero
+        active_periods = self.data.groupby(self.x_col)[self.y_col].sum()
+        active_periods = active_periods[active_periods > 0].index
+
+        # Filtra o mapeamento de períodos
+        active_mapping = {
+            k: v for k, v in self.period_mapping.items() if k in active_periods
+        }
+
+        self.fig.update_layout(
+            xaxis={
+                "title": {
+                    "text": self.xaxis_title,
+                    "font": {"size": 14, "color": theme["axis_color"]},
+                },
+                "tickvals": list(active_mapping.keys()),
+                "ticktext": [m.upper()[:3] for m in active_mapping.values()],
+                "tickangle": 0,
+                "gridcolor": theme["grid_color"],
             },
         )
-
         # Configuração do estilo base
         self.apply_style(
             bg_color=theme["bg_color"],
@@ -185,7 +201,7 @@ class AreaChart:
                     "font": axis_font or {"size": 14, "color": theme["axis_color"]},
                 },
                 "tickvals": list(self.period_mapping.keys()),
-                "ticktext": list(self.period_mapping.values()),
+                "ticktext": [m.upper()[:3] for m in self.period_mapping.values()],
                 "tickangle": 0,
                 "gridcolor": grid_color or theme["grid_color"],
             },
@@ -205,17 +221,11 @@ class AreaChart:
             self.fig.update_layout(plot_bgcolor=plot_bg_color)
 
         self.fig.update_traces(
-            # marker=dict(
-            #     size=6, line=dict(width=1, color="white")  # Borda branca nos marcadores
-            # ),
-            opacity=opacity,
             line=dict(width=line_width),
-            hovertemplate=(
-                "<b>%{fullData.name}</b><br>"  # Apenas o nome do grupo
-                "Produção: %{y:,.0f} {self.unit}<br>"  # Formatação simplificada
-                "<extra></extra>"
-            ),
+            marker=dict(size=6, line=dict(width=1, color="white")),
+            opacity=opacity,
             mode="lines+markers",
+            hovertemplate=f"<b>%{{fullData.name}}</b><br>{self.xaxis_title}: %{{x}}<br>{self.yaxis_title}: <b>%{{y:,.0f}} {self.unit}</b><extra></extra>",
         )
         return self
 

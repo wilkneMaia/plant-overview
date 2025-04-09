@@ -101,6 +101,7 @@ class LineChart:
             color_discrete_sequence=self.colors,
             labels={self.y_col: f"{self.ylabel} ({self.unit})"},
             height=self.height,
+            template="plotly_dark" if self.theme == "dark" else None,
         )
 
     def _apply_theme_settings(self):
