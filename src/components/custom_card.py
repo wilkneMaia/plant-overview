@@ -108,7 +108,7 @@ def create_card(
             </span>
             <span style="font-weight: bold;
                          color: {border_color};
-                         margin-right: 5px;">
+                         margin-right: 2px;">
                 {row['value']}
             </span>
             <span style="color: {secondary_text};
@@ -133,6 +133,9 @@ def create_card(
         width: {width};
         height: {height};
         box-sizing: border-box;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     ">
         <div style="
             border-bottom: 1px solid {divider_color};
@@ -151,42 +154,35 @@ def create_card(
     """
 
 
+# def create_card_html(title: str, rows: list, footer: str = None) -> str:
 def create_card_html(title: str, rows: list, footer: str = None) -> str:
     """
-    Gera um card estilizado com design moderno e interativo.
+    Cria o HTML para um card otimizado para tema escuro com boa legibilidade.
 
     Args:
-        title (str): Título do card com ícone opcional (ex: "📈 Performance").
-        rows (list): Lista de dicionários com {icon, label, value, unit, trend, help}.
-        footer (str, opcional): Texto de rodapé. Se None, o rodapé não será exibido.
+        title: Título do card
+        rows: Lista de dicionários com dados das linhas
+        footer: Texto do rodapé (opcional)
 
     Returns:
-        str: HTML completo do card com CSS inline.
+        HTML como string com tooltips funcionais e contraste adequado
     """
-    # CSS modernizado com variáveis e animações
     css = """
     <style>
-    :root {
-        --primary-color: #00C853;
-        --secondary-color: #5E35B1;
-        --background-dark: #121212;
-        --text-primary: #FFFFFF;
-        --text-secondary: #B0B0B0;
-        --card-border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
     .energy-card {
         border-radius: 12px;
         padding: 20px;
         margin: 15px 0;
-        background: var(--background-dark);
-        color: var(--text-primary);
+        background: #1E1E1E;  /* Fundo mais escuro para melhor contraste */
+        color: #F0F0F0;      /* Texto principal mais claro */
         font-family: 'Segoe UI', system-ui;
-        border: var(--card-border);
+        border: 1px solid #333;
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .energy-card:hover {
@@ -201,7 +197,7 @@ def create_card_html(title: str, rows: list, footer: str = None) -> str:
         left: 0;
         width: 4px;
         height: 100%;
-        background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+        background: linear-gradient(to bottom, #4CAF50, #2E7D32);  /* Gradiente verde mais visível */
     }
 
     .card-title {
@@ -209,24 +205,32 @@ def create_card_html(title: str, rows: list, footer: str = None) -> str:
         font-weight: 600;
         margin-bottom: 20px;
         padding-bottom: 12px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid #333;  /* Divisor mais visível */
         display: flex;
         align-items: center;
         gap: 8px;
-        color: var(--primary-color);
+        color: #4CAF50;  /* Verde para o título */
     }
 
     .card-row {
         display: flex;
         align-items: center;
-        margin: 12px 0;
-        padding: 8px 0;
+        margin: 6px 0;  /* Maior espaçamento para melhor legibilidade */
+        padding: 4px 0;
         transition: all 0.2s ease;
     }
 
     .card-row:hover {
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(255, 255, 255, 0.05);  /* Hover sutil */
         border-radius: 6px;
+    }
+
+    .card-help {
+        display: inline-block;
+        margin-left: 6px;
+        font-size: 12px;
+        color: #64B5F6;  /* Azul mais claro para melhor visibilidade */
+        cursor: help;
     }
 
     .card-icon {
@@ -234,23 +238,25 @@ def create_card_html(title: str, rows: list, footer: str = None) -> str:
         height: 24px;
         margin-right: 12px;
         flex-shrink: 0;
+        filter: brightness(0) invert(0.8);  /* Ícones mais claros */
     }
 
     .card-label {
         flex: 1;
-        color: var(--text-primary);
+        color: #E0E0E0;  /* Texto mais claro */
         font-size: 0.95rem;
+        font-weight: 500;  /* Mais espessura para melhor legibilidade */
     }
 
     .card-value {
         font-weight: 700;
-        margin-right: 6px;
-        color: var(--primary-color);
+        margin-right: 2px;
+        color: #FFFFFF;  /* Branco puro para valores */
         font-size: 1.05rem;
     }
 
     .card-unit {
-        color: var(--text-secondary);
+        color: #B0B0B0;  /* Cinza para unidades */
         font-size: 0.85rem;
         min-width: 60px;
         text-align: right;
@@ -259,17 +265,18 @@ def create_card_html(title: str, rows: list, footer: str = None) -> str:
     .card-trend {
         margin-left: 8px;
         font-size: 0.8rem;
-        padding: 2px 6px;
+        padding: 2px 6px;  /* Mais padding para melhor visibilidade */
         border-radius: 4px;
+        font-weight: 600;
     }
 
     .trend-up {
-        background: rgba(0, 200, 83, 0.15);
-        color: var(--primary-color);
+        background: rgba(76, 175, 80, 0.2);  /* Verde mais transparente */
+        color: #4CAF50;
     }
 
     .trend-down {
-        background: rgba(255, 82, 82, 0.15);
+        background: rgba(255, 82, 82, 0.2);  /* Vermelho mais transparente */
         color: #FF5252;
     }
 
@@ -277,13 +284,28 @@ def create_card_html(title: str, rows: list, footer: str = None) -> str:
         margin-top: 5px;
         padding-top: 5px;
         font-size: 0.8rem;
-        color: var(--text-secondary);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: #9E9E9E;  /* Cinza para o rodapé */
+        border-top: 1px solid #333;
+        background-color: rgba(255, 255, 255, 0.03);
+        padding-bottom: 10px;
+    }
+
+    @media only screen and (max-width: 768px) {
+        .energy-card {
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .card-title {
+            font-size: 1.1rem;
+        }
+        .card-row {
+            margin: 4px 0;
+        }
     }
     </style>
     """
 
-    # Gera o conteúdo das linhas com suporte a trend indicators
+    # Gera o conteúdo das linhas
     rows_html = ""
     for row in rows:
         trend_html = ""
@@ -291,12 +313,12 @@ def create_card_html(title: str, rows: list, footer: str = None) -> str:
             trend_class = "trend-up" if row["trend"] >= 0 else "trend-down"
             trend_icon = "↑" if row["trend"] >= 0 else "↓"
             trend_html = f"""<span class="card-trend {trend_class}">
-                              {trend_icon} {abs(row['trend'])}%
-                            </span>"""
+                            {trend_icon} {abs(row['trend'])}%
+                        </span>"""
 
         help_html = (
-            f"""<span class="card-help" title="{row.get('help', '')}">ⓘ</span>"""
-            if "help" in row
+            f'<span class="card-help" title="{row["help"]}">ⓘ</span>'
+            if row.get("help")
             else ""
         )
 
@@ -310,22 +332,13 @@ def create_card_html(title: str, rows: list, footer: str = None) -> str:
         </div>
         """
 
-    # Adiciona o rodapé apenas se fornecido
-    footer_html = ""
-    if footer:
-        footer_html = f"""
-        <div class="card-footer">
-            {footer}
-        </div>
-        """
+    footer_html = f'<div class="card-footer">{footer}</div>' if footer else ""
 
-    # HTML completo do card
-    card_content = f"""
+    return f"""
+    {css}
     <div class="energy-card">
         <div class="card-title">{title}</div>
         {rows_html}
         {footer_html}
     </div>
     """
-
-    return css + card_content

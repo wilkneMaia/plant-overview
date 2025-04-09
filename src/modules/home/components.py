@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit.components.v1 as components
 
+from components.custom_card import create_card_html
 from config.constants import EconomicFactors, EnergyFactors, Icons
 from utils.helpers import load_icon_as_base64
 
@@ -14,7 +15,7 @@ from .metrics import (
 )
 
 
-def render_card(title: str, rows: list, footer: str = None, height: int = 275):
+def render_card(title: str, rows: list, footer: str = None, height: int = 220):
     """
     Renderiza um card estilizado no Streamlit.
 
@@ -22,16 +23,13 @@ def render_card(title: str, rows: list, footer: str = None, height: int = 275):
         title (str): Título do card.
         rows (list): Lista de dicionários com {icon, label, value, unit, help}.
         footer (str, opcional): Texto de rodapé. Se None, o rodapé não será exibido.
-        height (int, opcional): Altura do card. Padrão: 275.
+        height (int, opcional): Altura do card. Padrão: 220.
 
     Returns:
         None: Renderiza o card diretamente no Streamlit.
     """
-    from components.custom_card import create_card_html
-
     components.html(
-        create_card_html(title=title, rows=rows, footer=footer),
-        height=height,
+        create_card_html(title=title, rows=rows, footer=footer), height=height
     )
 
 
@@ -113,8 +111,9 @@ def display_system_overview_card(data: pd.DataFrame, microinverters=None):
         },
     ]
 
-    # Renderiza o card
-    render_card("📋 Visão Geral do Sistema", rows)
+    components.html(
+        create_card_html(title="📋 Visão Geral do Sistema", rows=rows), height=220
+    )
 
 
 # --- Cards de Métricas ---
