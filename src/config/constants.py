@@ -28,6 +28,24 @@ class FontSettings:
     DEFAULT_COLOR: Final[str] = "black"  # Cor padrão para textos
 
 
+# --- Font cards ---
+class FontCards:
+    TITLE: Final[dict] = {"size": "14px", "color": "#455564", "family": "Arial"}
+    SUBTITLE: Final[dict] = {"size": "12px", "color": "#202E38", "family": "Arial"}
+    PRIMARY_VALUE: Final[dict] = {"size": "22px", "color": "#00205B", "family": "Arial"}
+    SECONDARY_VALUE: Final[dict] = {
+        "size": "12px",
+        "color": "#2FC774",
+        "family": "Arial",
+    }
+    PRIMARY_UNIT: Final[dict] = {"size": "15px", "color": "#00205B", "family": "Arial"}
+    SECONDARY_UNIT: Final[dict] = {
+        "size": "12px",
+        "color": "#2FC774",
+        "family": "Arial",
+    }
+
+
 # --- Ícones ---
 class Icons:
     POWER_MONTH = "icon-power-month"
@@ -44,6 +62,7 @@ class Icons:
     DEVICES = "icon-devices"
     CALENDAR = "icon-calendar"
     PERFORMANCE = "icon-performance"
+    RAW_COAL_SAVED = "icon-raw-coal-saved"
 
 
 # --- Fatores ---

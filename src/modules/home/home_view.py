@@ -1,6 +1,8 @@
 import pandas as pd
 import streamlit as st
 
+from components.custom_card_2 import create_custom_card_2
+from config.constants import Icons
 from config.styles import setup_shared_styles
 
 from .charts import (
@@ -11,11 +13,12 @@ from .charts import (
     plot_microinverter_year_barchart,
 )
 from .components import (
+    card_info_energy_month,
+    card_info_energy_total,
+    card_info_energy_year,
     display_efficiency_card,
     display_environmental_card,
-    display_revenue_card,
     display_system_overview_card,
-    display_total_energy_card,
 )
 
 
@@ -69,17 +72,42 @@ class HomeView:
 
     def _display_metric_cards(self, data: pd.DataFrame):
         """Exibe os cards de receita e impacto ambiental."""
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             display_system_overview_card(data)
-            display_revenue_card(data)
+            # display_revenue_card(data)
 
         with col2:
-            display_total_energy_card(data)
+            # display_total_energy_card(data)
             display_environmental_card(data)
+            display_efficiency_card(data)
 
         with col3:
-            display_efficiency_card(data)
+            card_info_energy_month(
+                data,
+            )
+            card_info_energy_year(data)
+            card_info_energy_total(data)
+
+        with col4:
+            create_custom_card_2(
+                icon_name=Icons.RAW_COAL_SAVED,
+                main_title="Carvão bruto economizado",
+                value="10.58",
+                unit="Tonelada(s)",
+            )
+            create_custom_card_2(
+                icon_name=Icons.CO2,
+                main_title="Redução da emissão de CO2",
+                value="26.03",
+                unit="Tonelada(s)",
+            )
+            create_custom_card_2(
+                icon_name=Icons.TREE,
+                main_title="Neutralização de carbono",
+                value="1.422",
+                unit="Arvores",
+            )
 
     def _display_main_visualizations(self, data: pd.DataFrame):
         """Exibe as visualizações principais."""

@@ -1,8 +1,9 @@
 import pandas as pd
 import streamlit.components.v1 as components
 
+from components.card_info import card_info
 from components.custom_card import create_card_html
-from config.constants import EconomicFactors, EnergyFactors, Icons
+from config.constants import EconomicFactors, EnergyFactors, FontCards, Icons
 from utils.helpers import load_icon_as_base64
 
 from .metrics import (
@@ -268,3 +269,97 @@ def display_efficiency_card(data: pd.DataFrame):
 
     # Renderiza o card
     render_card("📊 Desvio Padrão | Eficiência", rows)
+
+
+# --- Cards de Informações ---
+#  Card de energia gerada no mês atual
+def card_info_energy_month(data: pd.DataFrame, tariff_kwh=None):
+    # Calcula as métricas
+    current_month_energy = calculate_current_month_energy(data)
+
+    # Usa o valor padrão da tarifa se não for fornecido
+    if tariff_kwh is None:
+        tariff_kwh = EconomicFactors.ELECTRICITY_PRICE_PER_KWH
+
+    card_info(
+        title="Energia este mês",
+        title_style=FontCards.TITLE,
+        primary_value=f"{current_month_energy:,.2f}",
+        primary_value_style=FontCards.PRIMARY_VALUE,
+        primary_unit=" kWh",
+        primary_unit_style=FontCards.PRIMARY_UNIT,
+        subtitle="Receita: ",
+        subtitle_style=FontCards.SUBTITLE,
+        secondary_value=f"{current_month_energy * tariff_kwh:,.2f}",
+        secondary_value_style=FontCards.SECONDARY_VALUE,
+        secondary_unit="R$",
+        secondary_unit_style=FontCards.SECONDARY_UNIT,
+        secondary_unit_position="left",
+        icon_name=Icons.POWER_MONTH,
+        icon_size="40px",
+        card_height="100px",
+        card_width="300px",
+        card_background_color="#f4f5f7",
+    )
+
+
+# Card de energia gerada no ano atual
+def card_info_energy_year(data: pd.DataFrame, tariff_kwh=None):
+    # Calcula as métricas
+    current_year_energy_mwh = alculate_current_year_energy(data)
+
+    # Usa o valor padrão da tarifa se não for fornecido
+    if tariff_kwh is None:
+        tariff_kwh = EconomicFactors.ELECTRICITY_PRICE_PER_KWH
+
+    card_info(
+        title="Energia este ano",
+        title_style=FontCards.TITLE,
+        primary_value=f"{current_year_energy_mwh:,.2f}",
+        primary_value_style=FontCards.PRIMARY_VALUE,
+        primary_unit=" MWh",
+        primary_unit_style=FontCards.PRIMARY_UNIT,
+        subtitle="Receita: ",
+        subtitle_style=FontCards.SUBTITLE,
+        secondary_value=f"{current_year_energy_mwh * tariff_kwh:,.2f}",
+        secondary_value_style=FontCards.SECONDARY_VALUE,
+        secondary_unit="R$",
+        secondary_unit_style=FontCards.SECONDARY_UNIT,
+        secondary_unit_position="left",
+        icon_name=Icons.POWER_YEAR,
+        icon_size="40px",
+        card_height="100px",
+        card_width="300px",
+        card_background_color="#f4f5f7",
+    )
+
+
+# Card de energia gerada total
+def card_info_energy_total(data: pd.DataFrame, tariff_kwh=None):
+    # Calcula as métricas
+    total_energy_mwh = calculate_total_energy(data)
+
+    # Usa o valor padrão da tarifa se não for fornecido
+    if tariff_kwh is None:
+        tariff_kwh = EconomicFactors.ELECTRICITY_PRICE_PER_KWH
+
+    card_info(
+        title="Energia total",
+        title_style=FontCards.TITLE,
+        primary_value=f"{total_energy_mwh:,.2f}",
+        primary_value_style=FontCards.PRIMARY_VALUE,
+        primary_unit=" MWh",
+        primary_unit_style=FontCards.PRIMARY_UNIT,
+        subtitle="Receita: ",
+        subtitle_style=FontCards.SUBTITLE,
+        secondary_value=f"{total_energy_mwh * tariff_kwh:,.2f}",
+        secondary_value_style=FontCards.SECONDARY_VALUE,
+        secondary_unit="R$",
+        secondary_unit_style=FontCards.SECONDARY_UNIT,
+        secondary_unit_position="left",
+        icon_name=Icons.POWER_TOTAL,
+        icon_size="40px",
+        card_height="100px",
+        card_width="300px",
+        card_background_color="#f4f5f7",
+    )
