@@ -69,6 +69,7 @@ class Icons:
 class EnergyFactors:
     CO2_KG_PER_KWH: Final[float] = 1.0  # Fonte: IPCC 2021 (exemplo)
     TREES_PER_KG_CO2: Final[float] = 1.0 / 18.32  # Fonte: EPA
+    COAL_SAVED_PER_MWH = 0.405  # Exemplo: 0.405 toneladas de carvão economizado por MWh
 
 
 class EconomicFactors:

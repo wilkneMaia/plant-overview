@@ -1,8 +1,6 @@
 import pandas as pd
 import streamlit as st
 
-from components.custom_card_2 import create_custom_card_2
-from config.constants import Icons
 from config.styles import setup_shared_styles
 
 from .charts import (
@@ -13,9 +11,12 @@ from .charts import (
     plot_microinverter_year_barchart,
 )
 from .components import (
+    card_info_co2,
     card_info_energy_month,
     card_info_energy_total,
     card_info_energy_year,
+    card_info_raw_coal_saved,
+    card_info_tree,
     display_efficiency_card,
     display_environmental_card,
     display_system_overview_card,
@@ -83,31 +84,14 @@ class HomeView:
             display_efficiency_card(data)
 
         with col3:
-            card_info_energy_month(
-                data,
-            )
+            card_info_energy_month(data)
             card_info_energy_year(data)
             card_info_energy_total(data)
 
         with col4:
-            create_custom_card_2(
-                icon_name=Icons.RAW_COAL_SAVED,
-                main_title="Carvão bruto economizado",
-                value="10.58",
-                unit="Tonelada(s)",
-            )
-            create_custom_card_2(
-                icon_name=Icons.CO2,
-                main_title="Redução da emissão de CO2",
-                value="26.03",
-                unit="Tonelada(s)",
-            )
-            create_custom_card_2(
-                icon_name=Icons.TREE,
-                main_title="Neutralização de carbono",
-                value="1.422",
-                unit="Arvores",
-            )
+            card_info_raw_coal_saved(data)
+            card_info_co2(data)
+            card_info_tree(data)
 
     def _display_main_visualizations(self, data: pd.DataFrame):
         """Exibe as visualizações principais."""

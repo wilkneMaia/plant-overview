@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit.components.v1 as components
 
 from components.card_info import card_info
+from components.card_info_2 import card_info_2
 from components.custom_card import create_card_html
 from config.constants import EconomicFactors, EnergyFactors, FontCards, Icons
 from utils.helpers import load_icon_as_base64
@@ -271,7 +272,7 @@ def display_efficiency_card(data: pd.DataFrame):
     render_card("📊 Desvio Padrão | Eficiência", rows)
 
 
-# --- Cards de Informações ---
+# --- Cards de informações ---
 #  Card de energia gerada no mês atual
 def card_info_energy_month(data: pd.DataFrame, tariff_kwh=None):
     # Calcula as métricas
@@ -362,4 +363,59 @@ def card_info_energy_total(data: pd.DataFrame, tariff_kwh=None):
         card_height="100px",
         card_width="300px",
         card_background_color="#f4f5f7",
+    )
+
+
+# --- Cards de informações impacto ambiental ---
+def card_info_raw_coal_saved(data: pd.DataFrame):
+    # Calcula a energia total em MWh
+    total_energy_mwh = data["Energy"].sum() / 1000  # Converte kWh para MWh
+
+    # Calcula o carvão bruto economizado
+    raw_coal_saved = total_energy_mwh * EnergyFactors.COAL_SAVED_PER_MWH
+
+    # Renderiza o card
+    card_info_2(
+        title_style=FontCards.TITLE,
+        icon_name=Icons.RAW_COAL_SAVED,
+        main_title="Carvão bruto economizado",
+        value=f"{raw_coal_saved:,.2f}",  # Formata com 2 casas decimais
+        unit="Tonelada(s)",
+        card_height="100px",
+        card_width="300px",
+    )
+
+
+def card_info_co2(data: pd.DataFrame):
+
+    # Calcula as métricas
+    total_energy = data["Energy"].sum()
+    co2_reduced = (total_energy * EnergyFactors.CO2_KG_PER_KWH) / 1000
+
+    # Renderiza o card
+    card_info_2(
+        title_style=FontCards.TITLE,
+        icon_name=Icons.CO2,
+        main_title="Redução da emissão de CO2",
+        value=f"{co2_reduced:,.2f}",
+        unit="Tonelada(s)",
+        card_height="100px",
+        card_width="300px",
+    )
+
+
+def card_info_tree(data: pd.DataFrame):
+    # Calcula as métricas
+    total_energy = data["Energy"].sum()
+    trees_equivalent = total_energy * EnergyFactors.TREES_PER_KG_CO2
+
+    # Renderiza o card
+    card_info_2(
+        title_style=FontCards.TITLE,
+        icon_name=Icons.TREE,
+        main_title="Neutralização de carbono",
+        value=f"{trees_equivalent:,.0f}",
+        unit="Arvores",
+        card_height="100px",
+        card_width="300px",
     )
