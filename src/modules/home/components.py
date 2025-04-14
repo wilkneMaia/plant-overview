@@ -4,7 +4,13 @@ import streamlit.components.v1 as components
 from components.card_info import card_info
 from components.card_info_2 import card_info_2
 from components.custom_card import create_card_html
-from config.constants import EconomicFactors, EnergyFactors, FontCards, Icons
+from config.constants import (
+    EconomicFactors,
+    EnergyFactors,
+    FontCards,
+    Icons,
+    SystemFactors,
+)
 from utils.helpers import load_icon_as_base64
 
 from .metrics import (
@@ -272,7 +278,7 @@ def display_efficiency_card(data: pd.DataFrame):
     render_card("📊 Desvio Padrão | Eficiência", rows)
 
 
-# --- Cards de informações ---
+# --- Cards de informações gerais ---
 #  Card de energia gerada no mês atual
 def card_info_energy_month(data: pd.DataFrame, tariff_kwh=None):
     # Calcula as métricas
@@ -377,6 +383,7 @@ def card_info_raw_coal_saved(data: pd.DataFrame):
     # Renderiza o card
     card_info_2(
         title_style=FontCards.TITLE,
+        value_style=FontCards.PRIMARY_VALUE,
         icon_name=Icons.RAW_COAL_SAVED,
         main_title="Carvão bruto economizado",
         value=f"{raw_coal_saved:,.2f}",  # Formata com 2 casas decimais
@@ -395,6 +402,7 @@ def card_info_co2(data: pd.DataFrame):
     # Renderiza o card
     card_info_2(
         title_style=FontCards.TITLE,
+        value_style=FontCards.PRIMARY_VALUE,
         icon_name=Icons.CO2,
         main_title="Redução da emissão de CO2",
         value=f"{co2_reduced:,.2f}",
@@ -412,10 +420,159 @@ def card_info_tree(data: pd.DataFrame):
     # Renderiza o card
     card_info_2(
         title_style=FontCards.TITLE,
+        value_style=FontCards.PRIMARY_VALUE,
         icon_name=Icons.TREE,
         main_title="Neutralização de carbono",
         value=f"{trees_equivalent:,.0f}",
         unit="Arvores",
+        card_height="100px",
+        card_width="300px",
+    )
+
+
+# --- Cards de informações desvio padrão | eficiência ---
+# Card de desvio padrão
+def card_info_std_dev(data: pd.DataFrame):
+    # Calcula as métricas
+    energy_std_dev = calculate_energy_std_dev(data)
+
+    # Renderiza o card
+    card_info_2(
+        title_style=FontCards.TITLE,
+        value_style=FontCards.PRIMARY_VALUE,
+        # icon_name=Icons.STD_DEV,
+        icon_name=Icons.DEFAULT,
+        main_title="Desvio padrão",
+        value=f"{energy_std_dev:,.2f}",
+        unit="kWh",
+        card_height="100px",
+        card_width="300px",
+    )
+
+
+def calculate_energy_efficiency(data: pd.DataFrame):
+    """
+    Calcula a eficiência do sistema com base na energia gerada e na capacidade máxima do sistema.
+
+    Args:
+        data (pd.DataFrame): DataFrame contendo os dados de energia gerada.
+
+    Returns:
+        float: Eficiência do sistema em porcentagem.
+    """
+    # Calcula a energia total gerada
+    total_energy = data["Energy"].sum()  # Energia total gerada em kWh
+
+    # Calcula o número de dias no período analisado
+    if "Date" in data.columns:
+        num_days = (data["Date"].max() - data["Date"].min()).days + 1
+    else:
+        raise ValueError("A coluna 'Date' é necessária para calcular o período.")
+
+    # Calcula a capacidade máxima do sistema no período (em kWh)
+    max_capacity = (
+        num_days * SystemFactors.SYSTEM_CAPACITY_KW * 24
+    )  # Capacidade diária * 24 horas
+
+    # Calcula a eficiência como porcentagem
+    efficiency = (total_energy / max_capacity) * 100 if max_capacity > 0 else 0
+
+    return efficiency
+
+
+# Card de Eficiência Média
+def card_info_average_efficiency(data: pd.DataFrame):
+    # Calcula as métricas
+    efficiency = calculate_energy_efficiency(data)
+
+    # Renderiza o card
+    card_info_2(
+        title_style=FontCards.TITLE,
+        value_style=FontCards.PRIMARY_VALUE,
+        # icon_name=Icons.EFFICIENCY,
+        icon_name=Icons.DEFAULT,
+        main_title="Eficiência Média",
+        value=f"{efficiency:,.2f}",
+        unit="%",
+        card_height="100px",
+        card_width="300px",
+    )
+
+
+#  Card decoeficiente de variação
+def card_info_coefficient_of_variation(data: pd.DataFrame):
+    # Calcula as métricas
+    coefficient_of_variation = calculate_coefficient_of_variation(data)
+
+    # Renderiza o card
+    card_info_2(
+        title_style=FontCards.TITLE,
+        value_style=FontCards.PRIMARY_VALUE,
+        # icon_name=Icons.EFFICIENCY,
+        icon_name=Icons.DEFAULT,
+        main_title="Coeficiente de Variação",
+        value=f"{coefficient_of_variation:,.2f}",
+        unit="%",
+        card_height="100px",
+        card_width="300px",
+    )
+
+
+# --- Cards de informações gerais do sistema ---
+# Card de registros
+def card_info_records(data: pd.DataFrame):
+    # Calcula as métricas
+    num_records = data.shape[0]
+
+    # Renderiza o card
+    card_info_2(
+        title_style=FontCards.TITLE,
+        value_style=FontCards.SECONDARY_VALUE,
+        # icon_name=Icons.RECORDS,
+        icon_name=Icons.INCOME_TODAY,
+        main_title="Registros",
+        value=f"{num_records}",
+        unit="entrada(s)",
+        card_height="100px",
+        card_width="300px",
+    )
+
+
+# Card de microinversores ativos
+def card_info_microinverters(data: pd.DataFrame):
+    # Calcula as métricas
+    num_microinverters = data["Microinversor"].nunique()
+
+    # Renderiza o card
+    card_info_2(
+        title_style=FontCards.TITLE,
+        value_style=FontCards.PRIMARY_VALUE,
+        # icon_name=Icons.MICROINVERTERS,
+        icon_name=Icons.DEVICES,
+        main_title="Microinversores ativos",
+        value=f"{num_microinverters}",
+        unit="microinversor(es)",
+        card_height="100px",
+        card_width="300px",
+    )
+
+
+# Card de períodos analisados
+def card_info_period(data: pd.DataFrame):
+    # Calcula as métricas
+    start_date = data["Date"].min()
+    end_date = data["Date"].max()
+    period = f"{start_date.strftime('%d/%m/%Y')} a {end_date.strftime('%d/%m/%Y')}"
+
+    # Renderiza o card
+    card_info_2(
+        title_style=FontCards.TITLE,
+        value_style=FontCards.PRIMARY_VALUE,
+        # icon_name=Icons.PERIOD,
+        icon_name=Icons.CALENDAR,
+        main_title="Período",
+        value=f"{period}",
+        unit="",
         card_height="100px",
         card_width="300px",
     )

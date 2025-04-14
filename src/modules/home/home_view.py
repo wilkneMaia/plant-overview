@@ -11,15 +11,18 @@ from .charts import (
     plot_microinverter_year_barchart,
 )
 from .components import (
+    card_info_average_efficiency,
     card_info_co2,
+    card_info_coefficient_of_variation,
     card_info_energy_month,
     card_info_energy_total,
     card_info_energy_year,
+    card_info_microinverters,
+    card_info_period,
     card_info_raw_coal_saved,
+    card_info_records,
+    card_info_std_dev,
     card_info_tree,
-    display_efficiency_card,
-    display_environmental_card,
-    display_system_overview_card,
 )
 
 
@@ -75,19 +78,24 @@ class HomeView:
         """Exibe os cards de receita e impacto ambiental."""
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            display_system_overview_card(data)
+            # display_system_overview_card(data)
             # display_revenue_card(data)
+            # display_total_energy_card(data)
+            # display_environmental_card(data)
+            # display_efficiency_card(data)
+            card_info_period(data)
+            card_info_records(data)
+            card_info_microinverters(data)
 
         with col2:
-            # display_total_energy_card(data)
-            display_environmental_card(data)
-            display_efficiency_card(data)
-
-        with col3:
             card_info_energy_month(data)
             card_info_energy_year(data)
             card_info_energy_total(data)
 
+        with col3:
+            card_info_std_dev(data)
+            card_info_average_efficiency(data)
+            card_info_coefficient_of_variation(data)
         with col4:
             card_info_raw_coal_saved(data)
             card_info_co2(data)

@@ -13,6 +13,8 @@ def card_info_2(
     card_width: str = "250px",
     card_background_color: str = "#f4f5f7",
     title_style: dict = FontCards.TITLE,
+    value_style: dict = FontCards.PRIMARY_VALUE,
+    # icon_size: str = "40px",
 ):
     icon_base64 = load_icon_as_base64(icon_name)
 
@@ -60,10 +62,11 @@ def card_info_2(
         color: {title_style['color']};
     }}
 
-    .value {{
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #34495E;
+    .value_style {{
+        font-size: {value_style['size']};
+        font-family: {value_style['family']};
+        color: {value_style['color']};
+        margin-right: 10px; /* Espaço entre o subtitle e o valor */
     }}
 
     .unit {{
@@ -76,7 +79,7 @@ def card_info_2(
         <img class="card-icon" src="data:image/svg+xml;base64,{icon_base64}" alt="Icon">
         <div class="card-content">
             <div class="title">{main_title}</div>
-            <div class="value">{value} <span class="unit">{unit}</span></div>
+            <div class="value_style">{value} <span class="unit">{unit}</span></div>
         </div>
     </div>
     """
