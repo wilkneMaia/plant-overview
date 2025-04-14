@@ -508,7 +508,6 @@ def card_info_coefficient_of_variation(data: pd.DataFrame):
     card_info_2(
         title_style=FontCards.TITLE,
         value_style=FontCards.PRIMARY_VALUE,
-        # icon_name=Icons.EFFICIENCY,
         icon_name=Icons.DEFAULT,
         main_title="Coeficiente de Variação",
         value=f"{coefficient_of_variation:,.2f}",

@@ -19,8 +19,8 @@ def render_secondary_value(
 def render_icon_html(icon_base64: str | None) -> str:
     """Renderiza o ícone (base64) ou um fallback SVG."""
     if icon_base64:
-        return f'<img src="data:image/svg+xml;base64,{icon_base64}" alt="Icon" class="icon">'
-    return '<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#6c757d"><circle cx="12" cy="12" r="10"/></svg>'
+        return f'<img src="data:image/svg+xml;base64,{icon_base64}" alt="Icon" class="card-icon-custom">'
+    return '<svg class="card-icon-custom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#6c757d"><circle cx="12" cy="12" r="10"/></svg>'
 
 
 def generate_card_css(
@@ -58,7 +58,7 @@ def generate_card_css(
         box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
     }}
 
-    .icon {{
+    .card-icon-custom {{
         width: {icon_size};
         height: {icon_size};
         margin-right: 10px;
