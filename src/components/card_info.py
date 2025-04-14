@@ -52,28 +52,33 @@ def generate_card_css(
         align-items: center;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }}
+
     .card:hover {{
         transform: translateY(-5px);
         box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
     }}
+
     .icon {{
         width: {icon_size};
         height: {icon_size};
         margin-right: 10px;
         flex-shrink: 0;
     }}
+
     .card-content {{
         display: flex;
         flex-direction: column;
         justify-content: center;
         width: 100%;
     }}
+
     .title {{
         font-size: {title_style['size']};
         font-family: {title_style['family']};
         font-weight: bold;
         color: {title_style['color']};
     }}
+
     .subtitle-container {{
         display: flex;
         align-items: center;
@@ -86,34 +91,50 @@ def generate_card_css(
         margin-left: auto;
         margin-right: auto;
     }}
+
     .subtitle {{
         font-size: {subtitle_style['size']};
         font-family: {subtitle_style['family']};
         color: {subtitle_style['color']};
         margin-right: 10px;
     }}
+
     .primary-value {{
         font-size: {primary_value_style['size']};
         font-family: {primary_value_style['family']};
         font-weight: bold;
         color: {primary_value_style['color']};
     }}
+
     .secondary-value {{
         font-size: {secondary_value_style['size']};
         font-family: {secondary_value_style['family']};
         font-weight: bold;
         color: {secondary_value_style['color']};
     }}
+
     .primary-unit {{
         font-size: {primary_unit_style['size']};
         font-family: {primary_unit_style['family']};
         color: {primary_unit_style['color']};
     }}
+
     .secondary-unit {{
         font-size: {secondary_unit_style['size']};
         font-family: {secondary_unit_style['family']};
         color: {secondary_unit_style['color']};
         margin-right: 0.3px;
+    }}
+
+    /* Remove padding extra */
+    .card-wrapper {{
+        padding: 0;
+        margin: 0;
+    }}
+
+    /* Opcional: zera padding do layout inteiro do Streamlit */
+    [data-testid="stAppViewContainer"] > .main {{
+        padding: 0;
     }}
     </style>
     """
