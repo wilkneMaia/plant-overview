@@ -132,7 +132,7 @@ def plot_line_comparison_by_year(df) -> None:
                 x_col="Month",
                 y_col="Energy",
                 color_col="Year",
-                colors=Colors.GREEN_DISCRETE,
+                colors=Colors.LINE_COLORS,
                 period_mapping=month_names,
                 theme="dark",
             )

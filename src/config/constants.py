@@ -112,3 +112,11 @@ class Colors:
         "#C7F9CC",  # Verde limão
         "#E3F5E8",  # Verde limão claro
     ]
+    LINE_COLORS = [
+        "#00A878",  # verde
+        "#4ECDC4",  # verde-água
+        "#F9C80E",  # amarelo vibrante
+        "#F86624",  # laranja
+        "#EA3546",  # vermelho rosado
+        "#5D2E8C",  # roxo escuro
+    ]
