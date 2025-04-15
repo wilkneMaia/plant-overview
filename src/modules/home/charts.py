@@ -57,13 +57,19 @@ def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
             yaxis_title="Produção (MWh)",
         )
 
-        # Personalização e exibição
+        # Obter os anos únicos para inserir no subtítulo
+        years = sorted(yearly_data["Year"].unique())  # Ordena os anos
+        year_range = (
+            f"{years[0]}-{years[-1]}" if len(years) > 1 else f"{years[0]}"
+        )  # Intervalo de anos
+
+        # Personalização e exibição com subtítulo dinâmico
         (
             chart.set_titles(
                 title="Produção Energética Anual",
-                subtitle="Dados consolidados 2020-2024",
+                subtitle=f"Análise da geração de energia por ano ({year_range}), destacando a variação da produção ao longo dos anos.",
                 title_font={"size": 24, "color": "white"},
-                subtitle_font={"size": 16, "color": "#CCCCCC"},
+                subtitle_font={"size": 12, "color": "#CCCCCC"},
             )
             .apply_customizations(line_width=2, opacity=0.9)
             .show()
@@ -125,6 +131,12 @@ def plot_line_comparison_by_year(df) -> None:
         calculate_yearly_averages(monthly_data)
         detect_significant_trends(monthly_data)
 
+        # Obter os anos únicos para inserir no subtítulo
+        years = sorted(monthly_data["Year"].unique())  # Ordena os anos
+        year_range = (
+            f"{years[0]}-{years[-1]}" if len(years) > 1 else f"{years[0]}"
+        )  # Intervalo de anos
+
         # Criação do gráfico usando a nova função
         chart = (
             LineChart(
@@ -138,19 +150,13 @@ def plot_line_comparison_by_year(df) -> None:
             )
             .set_titles(
                 title="Análise de Produção de Energia",
-                subtitle="Comparação da geração de energia por ano e mês, destacando os picos de produção por ano.",
+                subtitle=f"Comparação da geração de energia por ano e mês ({year_range}), destacando os picos de produção por ano.",
             )
             .apply_style(line_width=3, marker_size=10, opacity=0.9)
             .add_peaks_per_group()
         )
 
         chart.show()
-
-        # Elementos adicionais
-        # add_average_lines(fig, yearly_averages, Colors.GREEN_DISCRETE)
-        # add_trend_annotations(fig, significant_trends, monthly_data)
-
-        # st.plotly_chart(fig, use_container_width=True)
 
     except Exception as e:
         handle_plot_error(e, df)

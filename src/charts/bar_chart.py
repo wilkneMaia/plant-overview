@@ -43,21 +43,6 @@ class BarChart:
         xaxis_title: str | None = None,
         yaxis_title: str | None = None,
     ):
-        """
-        Inicializa o gráfico de barras com configurações básicas
-
-        Args:
-            data: DataFrame com os dados
-            x_col: Coluna para eixo X
-            y_col: Coluna para eixo Y
-            color_scale: Escala de cores para gradiente
-            theme: Tema visual ('dark' ou 'light')
-            unit: Unidade de medida
-            height: Altura do gráfico
-            margin: Margens personalizadas
-            xaxis_title: Título personalizado para eixo X
-            yaxis_title: Título personalizado para eixo Y
-        """
         self.data = data
         self.x_col = x_col
         self.y_col = y_col
@@ -65,7 +50,7 @@ class BarChart:
         self.theme = theme.lower()
         self.unit = unit
         self.height = height
-        self.margin = margin or dict(l=60, r=30, t=90, b=60)
+        self.margin = margin or dict(l=60, r=30, t=70, b=60)  # Adjusted top margin
         self.xaxis_title = xaxis_title or x_col.replace("_", " ").title()
         self.yaxis_title = yaxis_title or f"PRODUÇÃO ({unit})"
         self.fig = self._create_base_figure()
@@ -112,12 +97,23 @@ class BarChart:
                 gridcolor=theme["grid_color"],
                 title_font=dict(size=14),
                 tickangle=0,
+                showgrid=False,  # Remove a grade horizontal
+                zeroline=True,  # Exibe a linha base do eixo X
+                zerolinecolor=theme["grid_color"],  # Cor da linha base
+                zerolinewidth=2,  # Espessura da linha base
+                showline=True,  # Garante que a linha do eixo X seja exibida
+                linecolor=theme["axis_color"],  # Cor da linha do eixo X
             ),
             yaxis=dict(
                 title=self.yaxis_title,
                 gridcolor=theme["grid_color"],
                 zerolinecolor=theme["grid_color"],
                 title_font=dict(size=14),
+                showgrid=False,  # Remove a grade vertical
+                zeroline=True,  # Exibe a linha base do eixo Y
+                zerolinewidth=2,  # Espessura da linha base
+                showline=True,  # Garante que a linha do eixo Y seja exibida
+                linecolor=theme["axis_color"],  # Cor da linha do eixo Y
             ),
             hoverlabel=dict(
                 bgcolor=theme["hover_bg"],
@@ -152,10 +148,11 @@ class BarChart:
                     f"<b>{title}</b><br><span style='font-size:{subtitle_font['size'] if subtitle_font else 16}px;color:{subtitle_font['color'] if subtitle_font else theme['subtitle_color']}'>{subtitle}</span>"
                 ),
                 "font": title_font or {"size": 22, "color": theme["title_color"]},
-                "y": 0.95,
-                "x": 0.5,
-                "xanchor": "center",
-            }
+                "y": 0.95,  # Ajuste a posição para reduzir o espaço superior
+                "x": 0,  # Alinhando o título à esquerda
+                "xanchor": "left",  # Alinha à esquerda
+            },
+            margin=dict(t=70),
         )
         return self
 
@@ -177,4 +174,16 @@ class BarChart:
 
     def show(self) -> None:
         """Exibe o gráfico no Streamlit"""
+        # Adicionando o estilo CSS para remover as bordas e padding do gráfico
+        st.markdown(
+            """
+            <style>
+                .stPlotlyChart {
+                    border: none !important;
+                    padding: 0 !important;
+                }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
         st.plotly_chart(self.fig, use_container_width=True)
