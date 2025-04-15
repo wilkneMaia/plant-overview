@@ -51,7 +51,7 @@ class LineChart:
         xlabel: str = "Mês",
         ylabel: str = "Energia",
         legend_title: str = "Ano",
-        height: int = 550,
+        height: int = 450,
         unit: str = "kWh",
     ):
         self.data = data
@@ -149,7 +149,7 @@ class LineChart:
             self.subtitle = subtitle
 
         default_subtitle_font = {
-            "size": 16,
+            "size": 12,
             "color": self.THEME_SETTINGS[self.theme]["subtitle_color"],
             "family": "Arial",
         }
@@ -168,11 +168,11 @@ class LineChart:
                         "family": "Arial",
                     }
                 ),
-                "y": 0.93,  # Ajuste do espaço entre o subtítulo e o gráfico
+                "y": 0.95,  # Ajuste do espaço entre o subtítulo e o gráfico
                 "x": 0,
                 "xanchor": "left",
             },
-            margin=dict(t=90),  # Aumenta a margem superior para criar mais espaço
+            margin=dict(t=70),  # Aumenta a margem superior para criar mais espaço
         )
         return self
 
@@ -223,22 +223,13 @@ class LineChart:
             "margin": {
                 "l": 0,  # Remove a margem esquerda
                 "r": 0,  # Remove a margem direita
-                "t": 120,  # Mantém a margem superior para o título
-                "b": 80,  # Ajusta a margem inferior
+                "t": 90,  # Mantém a margem superior para o título
+                "b": 60,  # Ajusta a margem inferior
             },
             "xaxis_showgrid": False,
             "yaxis_showgrid": False,
             "showlegend": False,  # Opcional: Remover a legenda se não for necessária
         }
-
-        # Remover borda externa e garantir fundo transparente
-        self.fig.update_layout(
-            margin=dict(
-                l=0, r=0, t=120, b=80
-            ),  # Margens ajustadas para não exibir bordas
-            plot_bgcolor="rgba(0,0,0,0)",  # Fundo transparente para o gráfico
-            paper_bgcolor="rgba(0,0,0,0)",  # Fundo transparente para o papel
-        )
 
         self.fig.update_layout(layout_updates)
         return self
@@ -256,7 +247,8 @@ class LineChart:
                         color=self.THEME_SETTINGS[self.theme]["highlight_color"],
                         size=12,
                     ),
-                    text=[f"Pico {name}"],
+                    # text=[f"Pico {name}"],
+                    text=["P"],
                     textposition="top center",
                 )
             )

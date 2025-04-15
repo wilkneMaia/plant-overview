@@ -6,7 +6,6 @@ from config.styles import setup_shared_styles
 from .charts import (
     plot_energy_heatmap_by_microinverter,
     plot_energy_production_by_year,
-    plot_energy_trend_by_year,
     plot_line_comparison_by_year,
     plot_microinverter_year_barchart,
 )
@@ -115,9 +114,10 @@ class HomeView:
         with col1:
             plot_energy_production_by_year(data)
         with col2:
-            plot_energy_trend_by_year(data)
+            # plot_energy_trend_by_year(data)
 
-        plot_line_comparison_by_year(data)
+            # st.divider()
+            plot_line_comparison_by_year(data)
 
     def _display_microinverter_analysis(self, data: pd.DataFrame):
         """Exibe análise detalhada por microinversor."""

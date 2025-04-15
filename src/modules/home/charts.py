@@ -137,7 +137,8 @@ def plot_line_comparison_by_year(df) -> None:
                 theme="dark",
             )
             .set_titles(
-                title="Análise de Produção", subtitle="Dados mensais consolidados"
+                title="Análise de Produção de Energia",
+                subtitle="Comparação da geração de energia por ano e mês, destacando os picos de produção por ano.",
             )
             .apply_style(line_width=3, marker_size=10, opacity=0.9)
             .add_peaks_per_group()
