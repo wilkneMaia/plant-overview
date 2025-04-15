@@ -152,7 +152,7 @@ class BarChart:
                 "x": 0,  # Alinhando o título à esquerda
                 "xanchor": "left",  # Alinha à esquerda
             },
-            margin=dict(t=70),
+            margin=dict(t=80),
         )
         return self
 
