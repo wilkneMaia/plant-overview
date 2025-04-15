@@ -197,28 +197,24 @@ class LineChart:
                 ),
             },
             "xaxis": {
-                "title": kwargs.get("xlabel", self.xlabel),
-                "showgrid": False,  # Remove as linhas de grade horizontais
-                "zeroline": True,  # Exibe a linha principal do eixo X
-                "zerolinecolor": "white",  # Cor da linha principal do eixo X
-                "zerolinewidth": 2,  # Espessura da linha
-                "showline": True,  # Exibe a linha principal do eixo X
-                "linecolor": theme["axis_color"],  # Cor da linha principal do eixo X
-                "tickvals": list(
-                    self.period_mapping.keys()
-                ),  # Define os valores do eixo X
-                "ticktext": [
-                    m.upper()[:3] for m in self.period_mapping.values()
-                ],  # Exibe os valores com a abreviação
+                "title": self.xlabel if self.xlabel else None,
+                "showgrid": False,
+                "zeroline": True,
+                "zerolinecolor": "white",
+                "zerolinewidth": 2,
+                "showline": True,
+                "linecolor": theme["axis_color"],
+                "tickvals": list(self.period_mapping.keys()),
+                "ticktext": [m.upper()[:3] for m in self.period_mapping.values()],
             },
             "yaxis": {
-                "title": kwargs.get("ylabel", f"{self.ylabel} ({self.unit})"),
-                "showgrid": False,  # Remove as linhas de grade verticais
-                "zeroline": True,  # Exibe a linha principal do eixo Y
-                "zerolinecolor": "white",  # Cor da linha principal do eixo Y
-                "zerolinewidth": 2,  # Espessura da linha
-                "showline": True,  # Exibe a linha principal do eixo Y
-                "linecolor": theme["axis_color"],  # Cor da linha principal do eixo Y
+                "title": f"{self.ylabel} ({self.unit})" if self.ylabel else None,
+                "showgrid": False,
+                "zeroline": True,
+                "zerolinecolor": "white",
+                "zerolinewidth": 2,
+                "showline": True,
+                "linecolor": theme["axis_color"],
             },
             "margin": {
                 "l": 0,  # Remove a margem esquerda
@@ -230,6 +226,16 @@ class LineChart:
             "yaxis_showgrid": False,
             "showlegend": False,  # Opcional: Remover a legenda se não for necessária
         }
+
+        # Customiza o hover de cada linha
+        for trace in self.fig.data:
+            trace.update(
+                hovertemplate=(
+                    f"<b>Ano: %{{fullData.name}}</b><br>"
+                    f"Mês: %{{x}}<br>"
+                    f"{(self.ylabel + ': ') if self.ylabel else ''}<b>%{{y:,.0f}} {self.unit}</b><extra></extra>"
+                )
+            )
 
         self.fig.update_layout(layout_updates)
         return self

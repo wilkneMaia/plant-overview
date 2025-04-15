@@ -51,8 +51,8 @@ class BarChart:
         self.unit = unit
         self.height = height
         self.margin = margin or dict(l=60, r=30, t=70, b=60)  # Adjusted top margin
-        self.xaxis_title = xaxis_title or x_col.replace("_", " ").title()
-        self.yaxis_title = yaxis_title or f"PRODUÇÃO ({unit})"
+        self.xaxis_title = xaxis_title
+        self.yaxis_title = yaxis_title
         self.fig = self._create_base_figure()
         self._apply_theme_settings()
 
@@ -64,7 +64,7 @@ class BarChart:
             y=self.y_col,
             color=self.y_col,
             color_continuous_scale=self.color_scale,
-            labels={self.y_col: self.yaxis_title},
+            labels={self.y_col: self.yaxis_title} if self.yaxis_title else None,
             height=self.height,
         )
 
@@ -77,9 +77,8 @@ class BarChart:
                 line=dict(width=1.5, color="rgba(255,255,255,0.7)"), opacity=0.85
             ),
             hovertemplate=(
-                f"<b>{self.xaxis_title} %{{x}}:</b><br>"
-                f"{self.yaxis_title}: <b>%{{y:,.0f}} {self.unit}</b><br>"
-                "<extra></extra>"
+                f"{(self.xaxis_title + ': ') if self.xaxis_title else ''}%{{x}}<br>"
+                f"{(self.yaxis_title + ': ') if self.yaxis_title else ''}%{{y:,.0f}} {self.unit}<extra></extra>"
             ),
             texttemplate="%{y:,.0f}",
             textposition="outside",
@@ -91,29 +90,29 @@ class BarChart:
             paper_bgcolor=theme["bg_color"],
             margin=self.margin,
             xaxis=dict(
-                title=self.xaxis_title,
+                title=self.xaxis_title if self.xaxis_title else None,
                 tickmode="array",
                 tickvals=self.data[self.x_col],
                 gridcolor=theme["grid_color"],
-                title_font=dict(size=14),
+                title_font=dict(size=14) if self.xaxis_title else None,
                 tickangle=0,
-                showgrid=False,  # Remove a grade horizontal
-                zeroline=True,  # Exibe a linha base do eixo X
-                zerolinecolor=theme["grid_color"],  # Cor da linha base
-                zerolinewidth=2,  # Espessura da linha base
-                showline=True,  # Garante que a linha do eixo X seja exibida
-                linecolor=theme["axis_color"],  # Cor da linha do eixo X
+                showgrid=False,
+                zeroline=True,
+                zerolinecolor=theme["grid_color"],
+                zerolinewidth=2,
+                showline=True,
+                linecolor=theme["axis_color"],
             ),
             yaxis=dict(
-                title=self.yaxis_title,
+                title=self.yaxis_title if self.yaxis_title else None,
                 gridcolor=theme["grid_color"],
                 zerolinecolor=theme["grid_color"],
-                title_font=dict(size=14),
-                showgrid=False,  # Remove a grade vertical
-                zeroline=True,  # Exibe a linha base do eixo Y
-                zerolinewidth=2,  # Espessura da linha base
-                showline=True,  # Garante que a linha do eixo Y seja exibida
-                linecolor=theme["axis_color"],  # Cor da linha do eixo Y
+                title_font=dict(size=14) if self.yaxis_title else None,
+                showgrid=False,
+                zeroline=True,
+                zerolinewidth=2,
+                showline=True,
+                linecolor=theme["axis_color"],
             ),
             hoverlabel=dict(
                 bgcolor=theme["hover_bg"],

@@ -53,8 +53,8 @@ def plot_energy_production_by_year(df: pd.DataFrame, unit: str = "kWh") -> None:
             color_scale=Colors.GREEN_SEQUENTIAL,
             theme="dark",
             unit="MWh",
-            xaxis_title="Ano",
-            yaxis_title="Produção (MWh)",
+            xaxis_title=None,
+            yaxis_title=None,
         )
 
         # Obter os anos únicos para inserir no subtítulo
@@ -147,6 +147,8 @@ def plot_line_comparison_by_year(df) -> None:
                 colors=Colors.LINE_COLORS,
                 period_mapping=month_names,
                 theme="dark",
+                xlabel=None,
+                ylabel=None,
             )
             .set_titles(
                 title="Análise de Produção de Energia",
