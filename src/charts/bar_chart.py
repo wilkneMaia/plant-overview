@@ -149,7 +149,7 @@ class BarChart:
                 ),
                 "font": title_font or {"size": 22, "color": theme["title_color"]},
                 "y": 0.95,  # Ajuste a posição para reduzir o espaço superior
-                "x": 0,  # Alinhando o título à esquerda
+                "x": 0.04,  # Alinhando o título à esquerda
                 "xanchor": "left",  # Alinha à esquerda
             },
             margin=dict(t=80),

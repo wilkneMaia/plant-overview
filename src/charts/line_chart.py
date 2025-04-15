@@ -169,7 +169,7 @@ class LineChart:
                     }
                 ),
                 "y": 0.95,  # Ajuste do espaço entre o subtítulo e o gráfico
-                "x": 0,
+                "x": 0.03,
                 "xanchor": "left",
             },
             margin=dict(t=70),  # Aumenta a margem superior para criar mais espaço
