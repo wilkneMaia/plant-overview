@@ -140,7 +140,7 @@ def plot_line_comparison_by_year(df) -> None:
                 title="Análise de Produção", subtitle="Dados mensais consolidados"
             )
             .apply_style(line_width=3, marker_size=10, opacity=0.9)
-            .add_peak_annotation()
+            .add_peaks_per_group()
         )
 
         chart.show()

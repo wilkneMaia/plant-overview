@@ -1,13 +1,13 @@
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
-from plotly import graph_objects as go
+from plotly.colors import qualitative
 
 
 class LineChart:
     """Classe para criação de gráficos de linha com suporte a temas dark/light"""
 
-    # Configurações de tema padrão
     THEME_SETTINGS = {
         "dark": {
             "title_color": "white",
@@ -19,6 +19,8 @@ class LineChart:
             "legend_bg": "rgba(40,40,40,0.7)",
             "hover_bg": "rgba(30,30,30,0.9)",
             "hover_font_color": "white",
+            "highlight_color": "#00FF88",
+            "dimmed_color": "#555555",
         },
         "light": {
             "title_color": "#333333",
@@ -30,6 +32,8 @@ class LineChart:
             "legend_bg": "rgba(240,240,240,0.7)",
             "hover_bg": "rgba(255,255,255,0.9)",
             "hover_font_color": "#333333",
+            "highlight_color": "#008000",
+            "dimmed_color": "#CCCCCC",
         },
     }
 
@@ -39,8 +43,8 @@ class LineChart:
         x_col: str,
         y_col: str,
         color_col: str,
-        colors: list[str],
-        period_mapping: dict[int, str],
+        colors: list[str] = None,
+        period_mapping: dict[int, str] = None,
         theme: str = "dark",
         title: str = "",
         subtitle: str = "",
@@ -50,31 +54,12 @@ class LineChart:
         height: int = 550,
         unit: str = "kWh",
     ):
-        """
-        Inicializa o gráfico de linhas comparativo
-
-        Args:
-            data: DataFrame com os dados
-            x_col: Coluna para eixo X
-            y_col: Coluna para eixo Y
-            color_col: Coluna para diferenciação
-            colors: Lista de cores
-            period_mapping: Dicionário de mapeamento de períodos
-            theme: 'dark' ou 'light'
-            title: Título principal
-            subtitle: Subtítulo
-            xlabel: Label eixo X
-            ylabel: Label eixo Y
-            legend_title: Título da legenda
-            height: Altura do gráfico
-            unit: Unidade de medida
-        """
         self.data = data
         self.x_col = x_col
         self.y_col = y_col
         self.color_col = color_col
-        self.colors = colors
-        self.period_mapping = period_mapping
+        self.colors = colors or qualitative.Plotly
+        self.period_mapping = period_mapping or {}
         self.theme = theme.lower()
         self.title = title
         self.subtitle = subtitle
@@ -87,12 +72,22 @@ class LineChart:
         if self.theme not in self.THEME_SETTINGS:
             raise ValueError(f"Tema '{theme}' inválido. Use 'dark' ou 'light'")
 
+        self._validate_columns()
         self.fig = self._create_figure()
         self._apply_theme_settings()
+        self._add_inline_labels()
+        self._hide_legend()
+
+    def _validate_columns(self):
+        required_cols = [self.x_col, self.y_col, self.color_col]
+        for col in required_cols:
+            if col not in self.data.columns:
+                raise ValueError(
+                    f"Coluna obrigatória '{col}' não encontrada no DataFrame."
+                )
 
     def _create_figure(self) -> go.Figure:
-        """Cria a figura base do gráfico de linhas"""
-        return px.line(
+        fig = px.line(
             self.data,
             x=self.x_col,
             y=self.y_col,
@@ -101,13 +96,18 @@ class LineChart:
             color_discrete_sequence=self.colors,
             labels={self.y_col: f"{self.ylabel} ({self.unit})"},
             height=self.height,
-            template="plotly_dark" if self.theme == "dark" else None,
+            template="plotly_dark" if self.theme == "dark" else "plotly_white",
         )
+        return fig
 
     def _apply_theme_settings(self):
-        """Aplica as configurações visuais do tema selecionado"""
-        theme = self.THEME_SETTINGS[self.theme]
+        """
+        Aplica as configurações de tema (cores, fontes, etc.) ao gráfico com base no tema especificado.
 
+        O tema pode ser 'dark' ou 'light'. Dependendo do tema escolhido, as cores do título, do subtítulo,
+        dos eixos e do fundo do gráfico serão ajustadas.
+        """
+        theme = self.THEME_SETTINGS[self.theme]
         self.set_titles(
             title_font={"size": 22, "color": theme["title_color"], "family": "Arial"},
             subtitle_font={
@@ -117,15 +117,24 @@ class LineChart:
             },
         )
 
-        self.apply_style(
-            bg_color=theme["bg_color"],
-            plot_bg_color=theme["plot_bg_color"],
-            axis_font={"size": 14, "color": theme["axis_color"]},
-            grid_color=theme["grid_color"],
-            legend_bg=theme["legend_bg"],
-            hover_bg=theme["hover_bg"],
-            hover_font_color=theme["hover_font_color"],
-        )
+    def _add_inline_labels(self):
+        for trace in self.fig.data:
+            if trace.mode and "lines" in trace.mode:
+                x_end = trace.x[-1]
+                y_end = trace.y[-1]
+                self.fig.add_annotation(
+                    x=x_end,
+                    y=y_end,
+                    text=trace.name,
+                    showarrow=False,
+                    font=dict(size=12, color=trace.line.color),
+                    xanchor="left",
+                    xshift=10,
+                    yshift=10,
+                )
+
+    def _hide_legend(self):
+        self.fig.update_layout(showlegend=False)
 
     def set_titles(
         self,
@@ -134,123 +143,136 @@ class LineChart:
         title_font: dict = None,
         subtitle_font: dict = None,
     ) -> "LineChart":
-        """Configura título e subtítulo do gráfico"""
-        if title is not None:
+        if title:
             self.title = title
-        if subtitle is not None:
+        if subtitle:
             self.subtitle = subtitle
+
+        default_subtitle_font = {
+            "size": 16,
+            "color": self.THEME_SETTINGS[self.theme]["subtitle_color"],
+            "family": "Arial",
+        }
+        subtitle_font = subtitle_font or default_subtitle_font
 
         self.fig.update_layout(
             title={
                 "text": (
-                    f"<b>{self.title}</b><br><span style='font-size:{subtitle_font['size'] if subtitle_font else 16}px;color:{subtitle_font['color'] if subtitle_font else self.THEME_SETTINGS[self.theme]['subtitle_color']}'>{self.subtitle}</span>"
+                    f"<b>{self.title}</b><br><span style='font-size:{subtitle_font['size']}px;color:{subtitle_font['color']}'>{self.subtitle}</span>"
                 ),
                 "font": (
                     title_font
                     or {
                         "size": 22,
                         "color": self.THEME_SETTINGS[self.theme]["title_color"],
+                        "family": "Arial",
                     }
                 ),
-                "y": 0.95,
-                "x": 0.5,
-                "xanchor": "center",
-            }
+                "y": 0.93,  # Ajuste do espaço entre o subtítulo e o gráfico
+                "x": 0,
+                "xanchor": "left",
+            },
+            margin=dict(t=90),  # Aumenta a margem superior para criar mais espaço
         )
         return self
 
-    def apply_style(
-        self,
-        bg_color: str = None,
-        plot_bg_color: str = None,
-        axis_font: dict = None,
-        grid_color: str = None,
-        legend_bg: str = None,
-        hover_bg: str = None,
-        hover_font_color: str = None,
-        show_legend: bool = True,
-        line_width: float = 2.5,
-        marker_size: int = 8,
-        opacity: float = 0.8,
-    ) -> "LineChart":
-        """Aplica estilização ao gráfico"""
+    def apply_style(self, **kwargs) -> "LineChart":
         theme = self.THEME_SETTINGS[self.theme]
 
-        # Configurações do hover
-        hoverlabel = {
-            "bgcolor": hover_bg or theme["hover_bg"],
-            "bordercolor": (
-                f"rgba({'255,255,255' if self.theme == 'dark' else '0,0,0'},0.2)"
+        layout_updates = {
+            "plot_bgcolor": kwargs.get(
+                "plot_bg_color", self.THEME_SETTINGS[self.theme]["plot_bg_color"]
             ),
-            "font_size": 12,
-            "font_color": hover_font_color or theme["hover_font_color"],
+            "paper_bgcolor": kwargs.get(
+                "bg_color", self.THEME_SETTINGS[self.theme]["bg_color"]
+            ),
+            "hovermode": kwargs.get("hovermode", "x unified"),
+            "hoverlabel": {
+                "bgcolor": kwargs.get(
+                    "hover_bg", self.THEME_SETTINGS[self.theme]["hover_bg"]
+                ),
+                "font_color": kwargs.get(
+                    "hover_font_color",
+                    self.THEME_SETTINGS[self.theme]["hover_font_color"],
+                ),
+            },
+            "xaxis": {
+                "title": kwargs.get("xlabel", self.xlabel),
+                "showgrid": False,  # Remove as linhas de grade horizontais
+                "zeroline": True,  # Exibe a linha principal do eixo X
+                "zerolinecolor": "white",  # Cor da linha principal do eixo X
+                "zerolinewidth": 2,  # Espessura da linha
+                "showline": True,  # Exibe a linha principal do eixo X
+                "linecolor": theme["axis_color"],  # Cor da linha principal do eixo X
+                "tickvals": list(
+                    self.period_mapping.keys()
+                ),  # Define os valores do eixo X
+                "ticktext": [
+                    m.upper()[:3] for m in self.period_mapping.values()
+                ],  # Exibe os valores com a abreviação
+            },
+            "yaxis": {
+                "title": kwargs.get("ylabel", f"{self.ylabel} ({self.unit})"),
+                "showgrid": False,  # Remove as linhas de grade verticais
+                "zeroline": True,  # Exibe a linha principal do eixo Y
+                "zerolinecolor": "white",  # Cor da linha principal do eixo Y
+                "zerolinewidth": 2,  # Espessura da linha
+                "showline": True,  # Exibe a linha principal do eixo Y
+                "linecolor": theme["axis_color"],  # Cor da linha principal do eixo Y
+            },
+            "margin": {
+                "l": 0,  # Remove a margem esquerda
+                "r": 0,  # Remove a margem direita
+                "t": 120,  # Mantém a margem superior para o título
+                "b": 80,  # Ajusta a margem inferior
+            },
+            "xaxis_showgrid": False,
+            "yaxis_showgrid": False,
+            "showlegend": False,  # Opcional: Remover a legenda se não for necessária
         }
 
+        # Remover borda externa e garantir fundo transparente
         self.fig.update_layout(
-            plot_bgcolor=plot_bg_color or theme["plot_bg_color"],
-            paper_bgcolor=bg_color or theme["bg_color"],
-            hoverlabel=hoverlabel,
-            hovermode="x unified",
-            margin=dict(l=80, r=50, t=100, b=80),
-            legend=(
-                {
-                    "title": {"text": self.legend_title, "font": {"size": 12}},
-                    "orientation": "h",
-                    "y": -0.25,
-                    "bgcolor": legend_bg or theme["legend_bg"],
-                }
-                if show_legend
-                else None
-            ),
-            xaxis={
-                "title": {
-                    "text": self.xlabel,
-                    "font": axis_font or {"size": 14, "color": theme["axis_color"]},
-                },
-                "tickvals": list(self.period_mapping.keys()),
-                "ticktext": [m.upper()[:3] for m in self.period_mapping.values()],
-                "tickangle": 0,
-                "gridcolor": grid_color or theme["grid_color"],
-            },
-            yaxis={
-                "title": {
-                    "text": f"{self.ylabel} ({self.unit})",
-                    "font": axis_font or {"size": 14, "color": theme["axis_color"]},
-                },
-                "gridcolor": grid_color or theme["grid_color"],
-            },
+            margin=dict(
+                l=0, r=0, t=120, b=80
+            ),  # Margens ajustadas para não exibir bordas
+            plot_bgcolor="rgba(0,0,0,0)",  # Fundo transparente para o gráfico
+            paper_bgcolor="rgba(0,0,0,0)",  # Fundo transparente para o papel
         )
 
-        self.fig.update_traces(
-            line=dict(width=line_width),
-            marker=dict(size=marker_size, line=dict(width=1, color="white")),
-            opacity=opacity,
-            mode="lines+markers",
-            hovertemplate=f"<b>%{{fullData.name}}</b><br>{self.xlabel}: %{{x}}<br>{self.ylabel}: <b>%{{y:,.0f}} {self.unit}</b><extra></extra>",
-        )
+        self.fig.update_layout(layout_updates)
         return self
 
-    def add_peak_annotation(
-        self, text: str = "Pico de Produção", x_offset: float = 0.5, y_offset: float = 0
-    ) -> "LineChart":
-        """Adiciona anotação no ponto de máximo"""
-        max_idx = self.data[self.y_col].idxmax()
-        peak_data = self.data.loc[max_idx]
-
-        theme = self.THEME_SETTINGS[self.theme]
-
-        self.fig.add_annotation(
-            text=text,
-            x=peak_data[self.x_col],
-            y=peak_data[self.y_col],
-            xshift=x_offset,
-            yshift=y_offset,
-            showarrow=True,
-            arrowhead=2,
-            font=dict(size=12, color=theme["axis_color"]),
-        )
+    def add_peaks_per_group(self, label_col="Year") -> "LineChart":
+        for name, group in self.data.groupby(label_col):
+            peak = group.loc[group[self.y_col].idxmax()]
+            self.fig.add_trace(
+                go.Scatter(
+                    x=[peak[self.x_col]],
+                    y=[peak[self.y_col]],
+                    mode="markers+text",
+                    name=f"Pico {name}",
+                    marker=dict(
+                        color=self.THEME_SETTINGS[self.theme]["highlight_color"],
+                        size=12,
+                    ),
+                    text=[f"Pico {name}"],
+                    textposition="top center",
+                )
+            )
         return self
 
     def show(self, **kwargs) -> None:
-        """Exibe o gráfico no Streamlit"""
-        st.plotly_chart(self.fig, use_container_width=True, **kwargs)
+        # Adicionando o estilo CSS para remover as bordas e padding do gráfico
+        st.markdown(
+            """
+            <style>
+                .stPlotlyChart {
+                    border: none !important;
+                    padding: 0 !important;
+                }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.plotly_chart(self.fig, use_container_width=True)
