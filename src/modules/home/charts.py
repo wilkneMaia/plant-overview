@@ -281,6 +281,13 @@ def plot_energy_heatmap_by_microinverter(data):
         except Exception as e:
             st.warning(f"Usando altura padrão: {e}")
 
+        # Obter os anos únicos para inserir no subtítulo
+        monthly_data = prepare_monthly_comparison_data(data)
+        years = sorted(monthly_data["Year"].unique())  # Ordena os anos
+        year_range = (
+            f"{years[0]}-{years[-1]}" if len(years) > 1 else f"{years[0]}"
+        )  # Intervalo de anos
+
         # Criação e configuração do heatmap
         heatmap = Heatmap(
             data_values=df_agg.values.tolist(),
@@ -288,19 +295,14 @@ def plot_energy_heatmap_by_microinverter(data):
             y_labels=df_agg.index.tolist(),
             color_scale=Colors.GREEN_SEQUENTIAL,
             theme="dark",
-            title="Produção de Energia por Ano",
-            subtitle="Microinversores",
-            xlabel="Ano",
-            ylabel="Microinversor",
+            title="Distribuição de Energia por Microinversor ao Longo dos Anos",
+            subtitle=f"Análise da produção de energia anual dos microinversores com produção superior a 0 kWh, de ({year_range}).",
+            xlabel=None,
+            ylabel=None,
             height=450,
             title_font={"size": 24, "color": "white"},
             subtitle_font={"size": 16, "color": "#CCCCCC"},
             margin=dict(l=30, r=145, t=90, b=30),
-        ).set_titles(
-            title="Distribuição de Energia por Ano",
-            subtitle="Microinversores com produção > 0",
-            title_font={"size": 24, "color": "white"},
-            subtitle_font={"size": 16, "color": "#CCCCCC"},
         )
 
         # Exibição do heatmap
@@ -310,3 +312,8 @@ def plot_energy_heatmap_by_microinverter(data):
     except Exception as e:
         handle_heatmap_error(e, data)
         return None
+
+
+def plot_grafico_area_empilhada(data):
+
+    pass

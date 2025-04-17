@@ -35,9 +35,10 @@ class Heatmap:
         theme: str = "light",
         title: str = "",
         subtitle: str = "",
-        xlabel: str = "Eixo X",
-        ylabel: str = "Eixo Y",
+        xlabel: str = None,  # Tornando opcional
+        ylabel: str = None,  # Tornando opcional
         height: int = 600,
+        width: int = None,  # Novo parâmetro para controlar a largura
         title_font: dict = None,
         subtitle_font: dict = None,
         unit: str = "kWh",
@@ -58,6 +59,7 @@ class Heatmap:
             xlabel: Rótulo do eixo x.
             ylabel: Rótulo do eixo y.
             height: Altura do gráfico.
+            width: Largura do gráfico.
             title_font: Configurações de fonte para o título.
             subtitle_font: Configurações de fonte para o subtítulo.
             unit: Unidade de medida.
@@ -74,10 +76,13 @@ class Heatmap:
         self.xlabel = xlabel
         self.ylabel = ylabel
         self.height = height
+        self.width = width if width else 1200  # Definir uma largura padrão se None
         self.title_font = title_font
         self.subtitle_font = subtitle_font
         self.unit = unit
-        self.margin = margin
+        self.margin = (
+            margin if margin else {"l": 40, "r": 40, "t": 40, "b": 40}
+        )  # Ajustar margens
         self.show_colorbar = show_colorbar  # assign to self
         self.theme_settings = self.THEME_SETTINGS.get(
             theme, self.THEME_SETTINGS["dark"]
@@ -106,8 +111,8 @@ class Heatmap:
 
     def set_layout(self):
         """Define o layout do heatmap."""
-        self.fig.update_layout(
-            title={
+        layout_config = {
+            "title": {
                 "text": (
                     f"<b>{self.title}</b><br><span style='font-size:{self.subtitle_font['size'] if self.subtitle_font else 16}px;color:{self.subtitle_font['color'] if self.subtitle_font else self.theme_settings['title_color']}'>{self.subtitle}</span>"
                 ),
@@ -116,29 +121,54 @@ class Heatmap:
                     or {"size": 22, "color": self.theme_settings["title_color"]}
                 ),
                 "y": 0.95,
-                "x": 0.5,
-                "xanchor": "center",
+                "x": 0.06,
+                "xanchor": "left",  # Alinhado à esquerda
             },
-            plot_bgcolor=self.theme_settings["bg_color"],
-            paper_bgcolor=self.theme_settings["bg_color"],
-            font=dict(color=self.theme_settings["axis_color"]),
-            xaxis=dict(
-                title={"text": f"<b>{self.xlabel}</b>", "font": {"size": 14}},
-                tickfont=dict(size=12, color=self.theme_settings["axis_color"]),
-                gridcolor=self.theme_settings["grid_color"],
-                tickmode="array",
-                tickvals=self.x_labels,
-                ticktext=self.x_labels,
+            "plot_bgcolor": self.theme_settings["bg_color"],
+            "paper_bgcolor": self.theme_settings["bg_color"],
+            "font": {"color": self.theme_settings["axis_color"]},
+            "height": self.height,
+            "width": self.width,  # Ajustando a largura do gráfico
+            "margin": {
+                "l": 40,
+                "r": 40,
+                "t": 100,
+                "b": 40,
+            },  # Aumenta a margem superior para espaçar o título do gráfico
+            "coloraxis_showscale": False,  # Remove a legenda do lado direito
+        }
+
+        # Remover linhas horizontais e mostrar apenas as linhas base dos eixos
+        layout_config["xaxis"] = {
+            "title": (
+                {"text": f"<b>{self.xlabel}</b>", "font": {"size": 14}}
+                if self.xlabel
+                else None
             ),
-            yaxis=dict(
-                title={"text": f"<b>{self.ylabel}</b>", "font": {"size": 14}},
-                tickfont=dict(size=12, color=self.theme_settings["axis_color"]),
-                gridcolor=self.theme_settings["grid_color"],
+            "tickfont": {"size": 12, "color": self.theme_settings["axis_color"]},
+            "gridcolor": "rgba(0,0,0,0)",  # Remove as linhas horizontais
+            "zerolinecolor": self.theme_settings["grid_color"],  # Linha base X
+            "zerolinewidth": 2,
+            "showline": True,
+            "linecolor": self.theme_settings["axis_color"],
+        }
+
+        layout_config["yaxis"] = {
+            "title": (
+                {"text": f"<b>{self.ylabel}</b>", "font": {"size": 14}}
+                if self.ylabel
+                else None
             ),
-            height=self.height,
-            margin=self.margin,
-            coloraxis_showscale=self.show_colorbar,  # hide color scale if false
-        )
+            "tickfont": {"size": 12, "color": self.theme_settings["axis_color"]},
+            "gridcolor": "rgba(0,0,0,0)",  # Remove as linhas horizontais
+            "zerolinecolor": self.theme_settings["grid_color"],  # Linha base Y
+            "zerolinewidth": 2,
+            "showline": True,
+            "linecolor": self.theme_settings["axis_color"],
+        }
+
+        # Aplica as configurações
+        self.fig.update_layout(layout_config)
 
     def apply_style(self):
         """Aplica o estilo ao heatmap."""

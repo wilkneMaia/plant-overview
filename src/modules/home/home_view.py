@@ -119,11 +119,20 @@ class HomeView:
             plot_line_comparison_by_year(data)
 
         st.divider()
-        fig_barchart = plot_microinverter_year_barchart(data)
-        if fig_barchart:
-            st.plotly_chart(fig_barchart, use_container_width=True)
-        else:
-            st.warning("Não foi possível gerar o gráfico de barras agrupadas.")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            fig_barchart = plot_microinverter_year_barchart(data)
+            if fig_barchart:
+                st.plotly_chart(fig_barchart, use_container_width=True)
+            else:
+                st.warning("Não foi possível gerar o gráfico de barras agrupadas.")
+        with col2:
+            ig_heatmap = plot_energy_heatmap_by_microinverter(data)
+            if ig_heatmap:
+                st.plotly_chart(ig_heatmap, use_container_width=True)
+            else:
+                st.warning("Não foi possível gerar o gráfico de calor.")
 
     def _display_microinverter_analysis(self, data: pd.DataFrame):
         """Exibe análise detalhada por microinversor."""
