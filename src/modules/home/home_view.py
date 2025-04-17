@@ -116,8 +116,14 @@ class HomeView:
         with col2:
             # plot_energy_trend_by_year(data)
 
-            # st.divider()
             plot_line_comparison_by_year(data)
+
+        st.divider()
+        fig_barchart = plot_microinverter_year_barchart(data)
+        if fig_barchart:
+            st.plotly_chart(fig_barchart, use_container_width=True)
+        else:
+            st.warning("Não foi possível gerar o gráfico de barras agrupadas.")
 
     def _display_microinverter_analysis(self, data: pd.DataFrame):
         """Exibe análise detalhada por microinversor."""

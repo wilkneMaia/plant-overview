@@ -180,18 +180,28 @@ def plot_microinverter_year_barchart(data):
         # Dividir os valores de energia por 100 para exibir em MWh
         df_agg["Energy"] = df_agg["Energy"] / 100
 
+        # Obter os anos únicos para inserir no subtítulo
+        monthly_data = prepare_monthly_comparison_data(df)
+        years = sorted(monthly_data["Year"].unique())  # Ordena os anos
+        year_range = (
+            f"{years[0]}-{years[-1]}" if len(years) > 1 else f"{years[0]}"
+        )  # Intervalo de anos
+
         # Construção do gráfico
         chart = GroupedBarChart(
+            title="Produção Anual por Microinversor",
+            subtitle=f"Comparativo da geração de energia entre microinversores nos anos de ({year_range}), com destaque para a média anual consolidada.",
             data=df_agg,
             x_col="Year",
             y_col="Energy",
             color_col="Microinversor",
             colors=Colors.GREEN_DISCRETE,
             theme="dark",
-            ylabel="Produção (MWh)",
-            xlabel="Ano",
+            ylabel=None,
+            xlabel=None,
             legend_title="Microinversor",
-        ).set_titles(title="Análise de Produção", subtitle="Dados mensais consolidados")
+            height=500,
+        )
 
         fig = chart.fig
 
